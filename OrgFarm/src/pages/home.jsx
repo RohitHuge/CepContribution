@@ -161,7 +161,7 @@ const Home = () => {
 
       {/* Footer */}
       <footer className="w-full bg-green-900 text-white text-center py-5 mt-auto rounded-t-2xl">
-        © 2025 | Created by Yash Malunjkar | Organic Farming Project
+        © 2025 | Created by Sumit Mate| Guidance by Rohit H.| Organic Farming Project
       </footer>
     </div>
     <Footer />
