@@ -7,6 +7,8 @@ const nextConfig = {
     unoptimized: true,
     domains: ['images.pexels.com'],
   },
+  output: 'standalone',
+  trailingSlash: false,
 };
 
 module.exports = nextConfig;
