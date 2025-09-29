@@ -1,0 +1,30 @@
+# Images Placeholder
+
+This folder should contain the following images from the original project:
+
+- lost-and-found.png
+- community.png
+- lost-card.png
+- found-card.png
+- mission.png
+- phone.jpg
+- watch.jpg
+- water-bottle.jpg
+- airpods.jpg
+- football.jpg
+- headphone.jpg
+- lost-2.jpg
+- found.jpg
+- register.jpg
+- contactus.jpg
+- shaking_hand.png
+- cheering.png
+- logo.png
+- rjitlogo.png
+- thinking.png
+- cheems.jpg
+- found_animated.jpg
+- lost_animated.jpg
+- background.png
+
+Please copy these images from the original Source folder to this public/images directory.
