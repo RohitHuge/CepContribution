@@ -26,8 +26,8 @@ const Home = () => {
 
           <div className="img col-lg-6 col-md-6 col-12">
             <img
-              src="/images/lost-and-found.png"
-              alt="image"
+              src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop&crop=center"
+              alt="Lost and Found Hero Image"
               className="img-fluid lost-found"
             />
           </div>
@@ -37,8 +37,8 @@ const Home = () => {
           <div className="container">
             <div className="img col-lg-6 col-md-6 col-12 w-50 pt-5 pb-5">
               <img
-                src="/images/community.png"
-                alt="image"
+                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=600&fit=crop&crop=center"
+                alt="Community Image"
                 className="img-fluid border-top-20"
               />
             </div>
@@ -81,7 +81,7 @@ const Home = () => {
             </div>
             <div className="d-flex flex-row-reverse justify-content-between container">
               <div className="card-image w-50 col-lg-6 col-md-3 col-12 text-right">
-                <img className="img-fluid w-100" src="/images/lost-card.png" alt="" />
+                <img className="img-fluid w-100" src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop&crop=center" alt="Lost Service Card" />
               </div>
               <div className="one col-lg-6 col-md-3 col-12 w-50 m-2 align-items-center lost-found-card">
                 <h5 className="card-title">Lost</h5>
@@ -106,7 +106,7 @@ const Home = () => {
             </div>
             <div className="d-flex flex-row justify-content-between container mt-5 pb-5">
               <div className="card-image w-50 col-lg-6 col-md-3 col-12 text-left">
-                <img className="img-fluid w-100" src="/images/found-card.png" alt="" />
+                <img className="img-fluid w-100" src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=300&fit=crop&crop=center" alt="Found Service Card" />
               </div>
               <div className="one col-lg-6 col-md-3 col-12 w-50 m-2 align-items-center lost-found-card">
                 <h5 className="card-title">Found</h5>
@@ -150,7 +150,7 @@ const Home = () => {
           <div className="container">
             <div className="card-group">
               <div className="card">
-                <img src="/images/phone.jpg" className="card-img-top" alt="..." />
+                <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop&crop=center" className="card-img-top" alt="Cellphone" />
                 <div className="card-body">
                   <h5 className="card-title">CELLPHONE</h5>
                   <p className="card-text">
@@ -162,7 +162,7 @@ const Home = () => {
                 </div>
               </div>
               <div className="card mx-2">
-                <img src="/images/watch.jpg" className="card-img-top" alt="..." />
+                <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop&crop=center" className="card-img-top" alt="Wrist Watch" />
                 <div className="card-body">
                   <h5 className="card-title">WRIST WATCH</h5>
                   <p className="card-text">
@@ -175,9 +175,9 @@ const Home = () => {
               </div>
               <div className="card">
                 <img
-                  src="/images/water-bottle.jpg"
+                  src="https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400&h=300&fit=crop&crop=center"
                   className="card-img-top"
-                  alt="..."
+                  alt="Water Bottle"
                 />
                 <div className="card-body">
                   <h5 className="card-title">WATER BOTTLE</h5>
@@ -192,7 +192,7 @@ const Home = () => {
             </div>
             <div className="card-group mt-2">
               <div className="card">
-                <img src="/images/airpods.jpg" className="card-img-top" alt="..." />
+                <img src="https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=400&h=300&fit=crop&crop=center" className="card-img-top" alt="AirPods" />
                 <div className="card-body">
                   <h5 className="card-title">AIRPPODS</h5>
                   <p className="card-text">
@@ -204,7 +204,7 @@ const Home = () => {
                 </div>
               </div>
               <div className="card mx-2">
-                <img src="/images/football.jpg" className="card-img-top" alt="..." />
+                <img src="https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=300&fit=crop&crop=center" className="card-img-top" alt="Football" />
                 <div className="card-body">
                   <h5 className="card-title">FOOTBALL</h5>
                   <p className="card-text">Return By : <strong>MESSI</strong></p>
@@ -214,7 +214,7 @@ const Home = () => {
                 </div>
               </div>
               <div className="card">
-                <img src="/images/headphone.jpg" className="card-img-top" alt="..." />
+                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop&crop=center" className="card-img-top" alt="Headphone" />
                 <div className="card-body">
                   <h5 className="card-title">HEADPHONE</h5>
                   <p className="card-text">
@@ -237,7 +237,7 @@ const Home = () => {
         <section className="service section-5">
           <div className="row align-items-center container mx-auto py-5">
             <div className="img col-lg-6 col-md-6 col-12 w-75">
-              <img src="/images/mission.png" alt="image" className="img-fluid" />
+              <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=600&fit=crop&crop=center" alt="Mission Image" className="img-fluid" />
             </div>
             <div className="text col-lg-6 col-md-6 col-12 w-75">
               <h2 className="title mb-3">
