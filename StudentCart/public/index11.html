@@ -1,0 +1,4320 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Enhanced Student Cart with Advanced Order Management</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    /* Base & Dark Mode Colors */
+    :root {
+      --base-bg: #f8f9fa;
+      --text-color: #212529;
+      --card-bg: linear-gradient(145deg, #e7f5ff 0%, #ffffff 80%);
+      --header-bg: rgba(255, 255, 255, 0.8);
+      --border-color: #e5e7eb;
+      --accent-color: #0077be;
+      --hover-text: #0077be;
+    }
+    :root.dark {
+      --base-bg: #0D0D0D;
+      --text-color: #f7f4f4;
+      --card-bg: linear-gradient(145deg, #0077be 0%, #0D0D0D 80%);
+      --header-bg: rgba(13, 13, 13, 0.8);
+      --border-color: rgba(0, 240, 255, 0.2);
+      --accent-color: #00F0FF;
+      --hover-text: #00F0FF;
+    }
+    body {
+      background-color: var(--base-bg);
+      color: var(--text-color);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      cursor: none;
+    }
+    h1, h2, h3 {
+      font-family: 'Orbitron', sans-serif;
+      text-transform: uppercase;
+    }
+    /* Selected text inside Address form dropdowns */
+#address-state,
+#checkout-state,
+#address-type {
+  color: #000 !important;     /* selected text always black */
+  background-color: #fff;     /* background white */
+}
+
+/* Dropdown list items */
+#address-state option,
+#checkout-state option,
+#address-type option {
+  color: #000 !important;     /* options black too */
+}
+
+
+    /* Cursor */
+    .custom-cursor {
+      position: fixed;
+      left: 0;
+      top: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.1s ease-out;
+    }
+    .cursor-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #FFA500;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #FFA500, 0 0 20px #FFA500;
+    }
+
+    /* Particles Canvas */
+    #particle-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Card Styles */
+    .interactive-card {
+      background: var(--card-bg);
+      border: 2px solid transparent;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .interactive-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 0 35px rgba(139, 0, 0, 0.8);
+      border-color: #9B0000;
+    }
+    .card-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.1;
+      transition: opacity 0.3s ease;
+    }
+    .interactive-card:hover .card-image {
+      opacity: 0.2;
+    }
+    .card-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Enhanced Product Card Layout */
+    .product-card-content {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 280px;
+    }
+    
+    .product-info {
+      flex: 1;
+      margin-bottom: 16px;
+    }
+    
+    .product-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: auto;
+    }
+    
+    .control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Auth Tabs */
+    .auth-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 20px;
+    }
+    .auth-tabs div {
+      padding: 10px 15px;
+      cursor: pointer;
+      color: #6c757d;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .auth-tabs div.active {
+      border-bottom: 3px solid var(--accent-color);
+      font-weight: bold;
+      color: var(--accent-color);
+    }
+    #auth-message {
+      text-align: center;
+      font-weight: bold;
+      margin: 15px 0;
+      min-height: 20px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* User Session */
+    #user-session {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #welcome-message {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent-color);
+    }
+    #logout-button {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #dc3545;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+    #logout-button:hover {
+      background-color: rgba(220, 53, 69, 0.1);
+    }
+    
+    .cart-qty-btn,
+    .cart-modal-qty-btn {
+      background: transparent;
+      border: 2px solid var(--accent-color);
+      color: var(--accent-color);
+      font-weight: bold;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      user-select: none;
+      transition: all 0.2s ease;
+      min-width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .cart-qty-btn:hover,
+    .cart-modal-qty-btn:hover {
+      background-color: var(--accent-color);
+      color: black;
+      transform: scale(1.05);
+    }
+
+    .quantity-display {
+      font-weight: bold;
+      color: var(--accent-color);
+      min-width: 30px;
+      text-align: center;
+      padding: 0 4px;
+      font-size: 14px;
+    }
+
+    /* Cart Item Styling */
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .cart-item:last-child {
+      border-bottom: none;
+    }
+    
+    .cart-item-info {
+      flex: 1;
+      margin-right: 16px;
+    }
+    
+    .cart-item-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .cart-item-price {
+      font-weight: bold;
+      color: var(--accent-color);
+      min-width: 80px;
+      text-align: right;
+    }
+
+    /* Empty cart styling */
+    .empty-cart-message {
+      text-align: center;
+      padding: 40px 20px;
+      color: #6c757d;
+      font-style: italic;
+    }
+
+    /* Buttons */
+    button {
+      outline-offset: 2px;
+    }
+
+    .btn-primary {
+      background: transparent;
+      border: 2px solid var(--accent-color);
+      color: var(--accent-color);
+      font-weight: bold;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-color);
+      color: black;
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: #28a745;
+      border: 2px solid #28a745;
+      color: white;
+      font-weight: bold;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-secondary:hover {
+      background: #218838;
+      border-color: #218838;
+      transform: translateY(-2px);
+    }
+
+    .btn-danger {
+      background: #dc3545;
+      border: 2px solid #dc3545;
+      color: white;
+      font-weight: bold;
+      padding: 8px 16px;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .btn-danger:hover {
+      background: #c82333;
+      border-color: #c82333;
+      transform: translateY(-2px);
+    }
+
+    .btn-cancel {
+      background: #f8d7da;
+      border: 2px solid #dc3545;
+      color: #dc3545;
+      font-weight: bold;
+      padding: 8px 16px;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-cancel:hover {
+      background: #dc3545;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .btn-cancel:disabled {
+      background: #f8f9fa;
+      border-color: #dee2e6;
+      color: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Trust Indicators */
+    .trust-indicators {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 12px;
+      max-width: 280px;
+      z-index: 1000;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .trust-score {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .security-badge {
+      background: linear-gradient(45deg, #10b981, #059669);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .trust-details {
+      font-size: 10px;
+      color: #6b7280;
+      line-height: 1.4;
+    }
+
+    /* Product Trust Scores */
+    .product-trust-score {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .trust-badge {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: bold;
+    }
+
+    .trust-excellent {
+      background: linear-gradient(45deg, #10b981, #059669);
+      color: white;
+    }
+
+    .trust-good {
+      background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+      color: white;
+    }
+
+    .trust-fair {
+      background: linear-gradient(45deg, #f59e0b, #d97706);
+      color: white;
+    }
+
+    .trust-bad {
+      background: linear-gradient(45deg, #ef4444, #dc2626);
+      color: white;
+    }
+
+    .product-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      transition: transform 0.3s ease;
+    }
+
+    .interactive-card:hover .product-image {
+      transform: scale(1.05);
+    }
+
+    .condition-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-left: 8px;
+    }
+
+    .condition-excellent {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 1px solid #10b981;
+    }
+
+    .condition-good {
+      background: rgba(59, 130, 246, 0.2);
+      color: #3b82f6;
+      border: 1px solid #3b82f6;
+    }
+
+    .condition-fair {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+      border: 1px solid #f59e0b;
+    }
+
+    .condition-bad {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border: 1px solid #ef4444;
+    }
+
+    /* === Enhanced Video Call Section Styles === */
+    .video-section {
+      margin: 3em 0 2em 0;
+      padding: 1.5em;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      background: var(--card-bg);
+      box-shadow: 0 2px 16px 4px rgba(0,0,0,0.09);
+    }
+    .video-section h2 { margin-bottom: 0.7em; color: var(--accent-color); }
+    
+    .video-container {
+      position: relative;
+      margin-top: 1em;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+      min-height: 400px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    
+    #localVideo, #remoteVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    #localVideo {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 200px;
+      height: 150px;
+      border-radius: 8px;
+      border: 2px solid var(--accent-color);
+      z-index: 10;
+    }
+    
+    #remoteVideo {
+      width: 100%;
+      height: 400px;
+    }
+    
+    .video-controls {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 15px;
+      background: rgba(0,0,0,0.8);
+      padding: 15px 25px;
+      border-radius: 50px;
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+    }
+    
+    .control-btn {
+      width: 50px;
+      height: 50px;
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: white;
+      position: relative;
+    }
+    
+    .control-btn.mic-btn {
+      background: #4CAF50;
+    }
+    
+    .control-btn.mic-btn.muted {
+      background: #f44336;
+    }
+    
+    .control-btn.camera-btn {
+      background: #2196F3;
+    }
+    
+    .control-btn.camera-btn.off {
+      background: #f44336;
+    }
+    
+    .control-btn.hang-up {
+      background: #f44336;
+    }
+    
+    .control-btn.accept {
+      background: #4CAF50;
+    }
+    
+    .control-btn.switch-camera {
+      background: #FF9800;
+    }
+    
+    .control-btn.settings {
+      background: #9C27B0;
+    }
+    
+    .control-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 20px rgba(255,255,255,0.3);
+    }
+    
+    .call-status {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 25px;
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+    }
+    
+    .call-timer {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 25px;
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      font-family: 'Orbitron', monospace;
+    }
+    
+    .pre-call-interface {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+    }
+    
+    .pre-call-controls {
+      display: flex;
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    .start-call-btn {
+      background: var(--accent-color);
+      color: white;
+      font-weight: bold;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,119,190,0.4);
+    }
+    
+    .start-call-btn:hover {
+      background: var(--hover-text);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,119,190,0.6);
+    }
+    
+    .incoming-call {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.95);
+      color: white;
+      padding: 2rem;
+      border-radius: 15px;
+      text-align: center;
+      z-index: 2000;
+      backdrop-filter: blur(20px);
+      display: none;
+    }
+    
+    .incoming-call-actions {
+      display: flex;
+      gap: 20px;
+      margin-top: 20px;
+      justify-content: center;
+    }
+    
+    .device-selector {
+      margin: 15px 0;
+    }
+    
+    .device-selector select {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 8px 15px;
+      border-radius: 8px;
+      margin: 0 10px;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .pulsing {
+      animation: pulse 2s infinite;
+    }
+
+    .video-call-btn {
+      background: linear-gradient(45deg, #4CAF50, #45a049);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      margin-left: 8px;
+    }
+
+    .video-call-btn:hover {
+      background: linear-gradient(45deg, #45a049, #4CAF50);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+    }
+
+    /* === ENHANCED PAYMENT & CHECKOUT STYLES === */
+    .checkout-modal {
+      max-width: 1200px;
+      width: 90vw;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .payment-method-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .payment-option {
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: var(--card-bg);
+      position: relative;
+    }
+
+    .payment-option:hover {
+      border-color: var(--accent-color);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .payment-option.selected {
+      border-color: var(--accent-color);
+      background: linear-gradient(145deg, var(--accent-color)20, var(--card-bg));
+    }
+
+    .payment-option .icon {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      color: var(--accent-color);
+    }
+
+    .payment-option .title {
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin-bottom: 5px;
+      color: var(--text-color);
+    }
+
+    .payment-option .description {
+      font-size: 0.9rem;
+      color: #6b7280;
+      line-height: 1.4;
+    }
+
+    .payment-form {
+      margin-top: 20px;
+      padding: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      background: var(--card-bg);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.05);
+      color: var(--text-color);
+      font-size: 14px;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--accent-color);
+      outline: none;
+    }
+
+    .checkout-steps {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .checkout-steps::before {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--border-color);
+      z-index: 1;
+    }
+
+    .checkout-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+      background: var(--base-bg);
+      padding: 0 15px;
+    }
+
+    .checkout-step .step-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--border-color);
+      color: var(--text-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-bottom: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .checkout-step.active .step-number {
+      background: var(--accent-color);
+      color: white;
+    }
+
+    .checkout-step.completed .step-number {
+      background: #10b981;
+      color: white;
+    }
+
+    .checkout-step .step-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    /* Address Management Styles */
+    .address-card {
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      transition: all 0.3s ease;
+      background: var(--card-bg);
+    }
+
+    .address-card.selected {
+      border-color: var(--accent-color);
+      background: linear-gradient(145deg, var(--accent-color)20, var(--card-bg));
+    }
+
+    .address-card:hover {
+      border-color: var(--accent-color);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .address-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .address-form {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    /* === ORDER TRACKING STYLES === */
+    .tracking-progress {
+      position: relative;
+      margin: 30px 0;
+    }
+
+    .progress-bar {
+      position: absolute;
+      top: 20px;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--border-color);
+      border-radius: 2px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-color), #10b981);
+      border-radius: 2px;
+      transition: width 0.8s ease;
+    }
+
+    .tracking-steps {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      z-index: 2;
+    }
+
+    .tracking-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 120px;
+      text-align: center;
+    }
+
+    .tracking-step .step-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+      transition: all 0.3s ease;
+      font-size: 18px;
+      color: #6b7280;
+    }
+
+    .tracking-step.completed .step-icon {
+      background: #10b981;
+      color: white;
+    }
+
+    .tracking-step.active .step-icon {
+      background: var(--accent-color);
+      color: white;
+      transform: scale(1.1);
+      box-shadow: 0 0 20px var(--accent-color)50;
+    }
+
+    .tracking-step .step-title {
+      font-weight: bold;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .tracking-step .step-time {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .order-summary {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+
+    .order-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px 0;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .order-item:last-child {
+      border-bottom: none;
+    }
+
+    .order-item:hover {
+      background-color: rgba(0,0,0,0.05);
+      border-radius: 8px;
+    }
+
+    .order-item-image {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .order-item-details {
+      flex: 1;
+    }
+
+    .order-item-name {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .order-item-price {
+      color: var(--accent-color);
+      font-weight: bold;
+    }
+
+    .delivery-info {
+      background: linear-gradient(145deg, #10b98120, var(--card-bg));
+      border: 1px solid #10b981;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+
+    .delivery-info .icon {
+      color: #10b981;
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .delivery-estimate {
+      font-size: 18px;
+      font-weight: bold;
+      color: #10b981;
+      margin-bottom: 8px;
+    }
+
+    .emi-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .emi-option {
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .emi-option:hover {
+      border-color: var(--accent-color);
+    }
+
+    .emi-option.selected {
+      border-color: var(--accent-color);
+      background: var(--accent-color)20;
+    }
+
+    .offers-section {
+      background: linear-gradient(145deg, #f59e0b20, var(--card-bg));
+      border: 1px solid #f59e0b;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+
+    .offer-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 6px;
+      background: rgba(245, 158, 11, 0.1);
+    }
+
+    .security-features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .security-feature {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 15px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .security-feature .icon {
+      color: #10b981;
+      font-size: 20px;
+    }
+
+    /* Confirmation Dialog Styles */
+    .confirmation-dialog {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+
+    .confirmation-content {
+      background: var(--card-bg);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .confirmation-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      color: var(--text-color);
+    }
+
+    .confirmation-message {
+      margin-bottom: 2rem;
+      color: var(--text-color);
+      line-height: 1.5;
+    }
+
+    .confirmation-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .order-status-cancelled {
+      color: #dc3545;
+      font-weight: bold;
+    }
+
+    .order-status-active {
+      color: #28a745;
+      font-weight: bold;
+    }
+
+    .order-status-delivered {
+      color: #10b981;
+      font-weight: bold;
+    }
+
+    .order-status-shipped {
+      color: #0077be;
+      font-weight: bold;
+    }
+
+    .order-status-confirmed {
+      color: #28a745;
+      font-weight: bold;
+    }
+
+    .order-status-packed {
+      color: #ffc107;
+      font-weight: bold;
+    }
+
+    .order-status-out-for-delivery {
+      color: #17a2b8;
+      font-weight: bold;
+    }
+
+    /* FIXED: Real-time Update Styles - Proper text color and background contrast */
+    .real-time-update {
+      background: #e8f5e8;
+      border-left: 4px solid #10b981;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 4px;
+      animation: fadeIn 0.5s ease-in;
+      color: #2d3748;
+      font-weight: 500;
+    }
+
+    /* Dark mode specific styles for real-time updates */
+    :root.dark .real-time-update {
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 4px solid #10b981;
+      color: #e2e8f0;
+    }
+
+    /* Live updates container styling */
+    #live-updates {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 16px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    :root.dark #live-updates {
+      background: #1a1a1a;
+      border: 1px solid #2d3748;
+      color: #e2e8f0;
+    }
+
+    /* Update message and time styling */
+    .real-time-update .font-semibold {
+      color: #1a202c;
+      margin-bottom: 4px;
+    }
+
+    :root.dark .real-time-update .font-semibold {
+      color: #f7fafc;
+    }
+
+    .real-time-update .text-xs {
+      color: #4a5568 !important;
+      font-size: 11px;
+    }
+
+    :root.dark .real-time-update .text-xs {
+      color: #a0aec0 !important;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .cancellation-info {
+      background: linear-gradient(145deg, #fef2f2, var(--card-bg));
+      border: 1px solid #fca5a5;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .cancellation-reasons {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .cancellation-reason {
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .cancellation-reason:hover {
+      border-color: var(--accent-color);
+      background: rgba(0,119,190,0.1);
+    }
+
+    .cancellation-reason.selected {
+      border-color: var(--accent-color);
+      background: rgba(0,119,190,0.2);
+    }
+
+    /* FIXED: Cancellation Comments Textarea Styling */
+    #cancellation-comments {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.05);
+      color: var(--text-color) !important;
+      font-size: 14px;
+      transition: border-color 0.3s ease;
+      resize: vertical;
+      min-height: 80px;
+      font-family: inherit;
+    }
+
+    #cancellation-comments:focus {
+      border-color: var(--accent-color);
+      outline: none;
+      color: var(--text-color) !important;
+    }
+
+    #cancellation-comments::placeholder {
+      color: #6b7280;
+      opacity: 1;
+    }
+
+    :root.dark #cancellation-comments {
+      background: rgba(0,0,0,0.3);
+      color: #e2e8f0 !important;
+    }
+
+    :root.dark #cancellation-comments::placeholder {
+      color: #9ca3af;
+    }
+
+    /* Cancel button highlight when order is cancellable */
+    .cancel-order-highlight {
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { box-shadow: 0 0 10px rgba(220, 53, 69, 0.3); }
+      to { box-shadow: 0 0 20px rgba(220, 53, 69, 0.6); }
+    }
+
+    @media (max-width: 768px) {
+      .checkout-modal {
+        width: 95vw;
+        margin: 20px;
+      }
+      
+      .payment-method-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .checkout-steps {
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+      
+      .tracking-steps {
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+
+      .address-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- Custom Cursor -->
+  <div class="custom-cursor"><div class="cursor-dot"></div></div>
+
+  <!-- Particle Background -->
+  <canvas id="particle-background"></canvas>
+
+  <!-- Fixed Header -->
+  <header class="fixed top-0 left-0 w-full bg-[var(--header-bg)] backdrop-blur-sm z-50">
+    <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <h1 id="company-name-header" class="text-2xl font-black tracking-widest text-[var(--accent-color)]">Student Cart</h1>
+      <div class="hidden md:flex items-center space-x-8">
+        <a href="#hub" class="text-sm uppercase tracking-wider hover:text-[var(--hover-text)] transition-colors">The Hub</a>
+        <a href="#archives" class="text-sm uppercase tracking-wider hover:text-[var(--hover-text)] transition-colors">The Archives</a>
+        <a href="#video-section" class="text-sm uppercase tracking-wider hover:text-[var(--hover-text)] transition-colors">Video Calls</a>
+        <a href="#orders" class="text-sm uppercase tracking-wider hover:text-[var(--hover-text)] transition-colors nav-link" data-target="orders-modal">My Orders</a>
+        <a href="#addresses" class="text-sm uppercase tracking-wider hover:text-[var(--hover-text)] transition-colors nav-link" data-target="address-modal">My Addresses</a>
+        <a href="#login" class="text-sm uppercase tracking-wider hover:text-[var(--hover-text)] transition-colors nav-link" data-target="login" id="auth-link">Login</a>
+        <div id="user-session" class="hidden">
+          <span id="welcome-message"></span>
+          <button id="logout-button">Logout</button>
+        </div>
+      </div>
+      <div class="flex items-center space-x-4">
+        <button id="theme-toggle" class="hover:text-[var(--hover-text)]" aria-label="Toggle Theme"></button>
+        <button id="cart-button" class="relative hover:text-[var(--hover-text)] nav-link" data-target="cart-modal" aria-label="Open Cart">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+          <span id="cart-item-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-6 pt-24">
+
+    <!-- Section 1: The Hub -->
+    <section id="hub" class="min-h-screen py-20">
+      <h2 class="text-4xl md:text-6xl font-black mb-4">MARKETPLACE ONLINE</h2>
+      <p class="text-lg text-gray-400 mb-12 max-w-3xl">A premium command center for buying and selling second-hand student essentials. No fluff. No noise. Just the gear you need.</p>
+      <div id="hub-categories" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"></div>
+    </section>
+
+    <!-- Section 2: The Archives -->
+    <section id="archives" class="min-h-screen py-20">
+      <h2 class="text-4xl md:text-6xl font-black mb-12 text-center">THE ARCHIVES</h2>
+      <div class="bg-[var(--header-bg)] backdrop-blur-sm p-4 rounded-lg shadow-md mb-8 flex flex-wrap gap-4 items-center justify-center">
+        <div class="flex-grow">
+          <label for="category-filter" class="block text-sm font-medium mb-1">Filter by Category</label>
+          <select id="category-filter" class="w-full p-2 border rounded-md shadow-sm bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"></select>
+        </div>
+        <div class="flex-grow">
+          <label for="price-sort" class="block text-sm font-medium mb-1">Sort by Price</label>
+          <select id="price-sort" class="w-full p-2 border rounded-md shadow-sm bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"></select>
+        </div>
+      </div>
+      <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"></div>
+    </section>
+
+    <!-- === ENHANCED VIDEO CALL SECTION === -->
+    <section id="video-section" class="video-section">
+      <h2>Verify Product & Seller via Video Call</h2>
+      <p>Want to confirm the authenticity of a product and seller before purchase? Start a secure video meeting below.</p>
+      
+      <div class="video-container" id="videoContainer">
+        <!-- Pre-call interface -->
+        <div class="pre-call-interface" id="preCallInterface">
+          <i class="fas fa-video text-6xl mb-4" style="color: var(--accent-color);"></i>
+          <h3 class="text-2xl font-bold mb-4">Ready to start your video call?</h3>
+          <p class="mb-6">Test your camera and microphone before joining</p>
+          
+          <div class="pre-call-controls">
+            <button class="control-btn mic-btn" id="preMicBtn" onclick="togglePreMic()">
+              <i class="fas fa-microphone"></i>
+            </button>
+            <button class="control-btn camera-btn" id="preCameraBtn" onclick="togglePreCamera()">
+              <i class="fas fa-video"></i>
+            </button>
+            <button class="control-btn switch-camera" onclick="switchCamera()">
+              <i class="fas fa-sync-alt"></i>
+            </button>
+          </div>
+          
+          <div class="device-selector">
+            <select id="cameraSelect" onchange="changeCamera()">
+              <option>Select Camera</option>
+            </select>
+            <select id="micSelect" onchange="changeMicrophone()">
+              <option>Select Microphone</option>
+            </select>
+          </div>
+          
+          <button class="start-call-btn" onclick="startVideoCall()">
+            <i class="fas fa-phone-alt"></i> Start Video Call
+          </button>
+        </div>
+        
+        <!-- Main video call interface -->
+        <div id="videoCallInterface" style="display: none; position: relative; height: 400px;">
+          <video id="remoteVideo" autoplay playsinline style="width: 100%; height: 100%; background: #000;"></video>
+          <video id="localVideo" autoplay playsinline muted style="position: absolute; top: 20px; right: 20px; width: 200px; height: 150px; border-radius: 8px; border: 2px solid var(--accent-color);"></video>
+        </div>
+        
+        <!-- Call status and timer -->
+        <div class="call-status" id="callStatus" style="display: none;">
+          <i class="fas fa-circle text-green-500"></i> Connected
+        </div>
+        <div class="call-timer" id="callTimer" style="display: none;">00:00</div>
+        
+        <!-- Video call controls -->
+        <div class="video-controls" id="videoControls" style="display: none;">
+          <button class="control-btn mic-btn" id="micBtn" onclick="toggleMicrophone()">
+            <i class="fas fa-microphone"></i>
+          </button>
+          
+          <button class="control-btn camera-btn" id="cameraBtn" onclick="toggleCamera()">
+            <i class="fas fa-video"></i>
+          </button>
+          
+          <button class="control-btn switch-camera" onclick="switchCamera()">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+          
+          <button class="control-btn settings" onclick="openSettings()">
+            <i class="fas fa-cog"></i>
+          </button>
+          
+          <button class="control-btn hang-up" onclick="hangUpCall()">
+            <i class="fas fa-phone-slash"></i>
+          </button>
+        </div>
+      </div>
+      
+      <small style="color:#888; display: block; margin-top: 10px;">
+        Buyer and seller can join the same room. Click "Start Video Call" to begin verification.
+      </small>
+    </section>
+
+    <!-- Incoming call modal -->
+    <div class="incoming-call" id="incomingCall">
+      <div class="text-center">
+        <i class="fas fa-phone-alt text-4xl mb-4 pulsing" style="color: var(--accent-color);"></i>
+        <h3 class="text-2xl font-bold mb-2">Incoming Call</h3>
+        <p class="mb-4">Seller wants to verify the product</p>
+        <div class="incoming-call-actions">
+          <button class="control-btn accept" onclick="acceptCall()">
+            <i class="fas fa-phone"></i>
+          </button>
+          <button class="control-btn hang-up" onclick="rejectCall()">
+            <i class="fas fa-phone-slash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Login Modal -->
+    <section id="login" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center" aria-hidden="true">
+      <div class="bg-[var(--card-bg)] p-8 rounded-lg shadow-lg w-full max-w-md relative" role="dialog" aria-modal="true" aria-labelledby="login-tab">
+        <button id="close-login" class="absolute top-4 right-4 text-2xl" aria-label="Close Login Modal">&times;</button>
+        <div class="auth-tabs" role="tablist">
+          <div id="login-tab" class="active" role="tab" tabindex="0" aria-selected="true">LOGIN</div>
+          <div id="register-tab" role="tab" tabindex="-1">REGISTER</div>
+        </div>
+        <div id="auth-message" role="alert"></div>
+        <form id="login-form">
+          <div class="mb-4"><label class="block text-sm font-bold mb-2" for="login-email">Email</label><input id="login-email" type="email" class="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg" placeholder="user@email.com" required /></div>
+          <div class="mb-6"><label class="block text-sm font-bold mb-2" for="login-password">Password</label><input id="login-password" type="password" class="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg" placeholder="********" required /></div>
+          <button class="w-full bg-[#0077be] dark:bg-[#00F0FF] text-white dark:text-black font-bold py-3 rounded-lg" type="submit">AUTHENTICATE</button>
+        </form>
+        <form id="register-form" class="hidden">
+          <div class="mb-4"><label class="block text-sm font-bold mb-2" for="register-email">Email</label><input id="register-email" type="email" class="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg" placeholder="user@email.com" required /></div>
+          <div class="mb-6"><label class="block text-sm font-bold mb-2" for="register-password">Password</label><input id="register-password" type="password" class="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg" placeholder="Choose a password" required /></div>
+          <button class="w-full bg-[#0077be] dark:bg-[#00F0FF] text-white dark:text-black font-bold py-3 rounded-lg" type="submit">REGISTER</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Section 4: Cart Modal -->
+    <section id="cart-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center" aria-hidden="true">
+      <div class="bg-[var(--card-bg)] p-8 rounded-lg shadow-lg w-full max-w-3xl relative" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+        <button id="close-cart" class="absolute top-4 right-4 text-2xl" aria-label="Close Cart Modal">&times;</button>
+        <h2 id="cart-title" class="text-3xl font-black text-center mb-6">YOUR CART</h2>
+        
+        <!-- Cart Items Container -->
+        <div id="cart-items" class="max-h-96 overflow-y-auto mb-6" aria-live="polite" aria-relevant="all">
+          <div class="empty-cart-message">
+            <p>Your cart is empty.</p>
+            <p class="text-sm mt-2">Add some items to get started!</p>
+          </div>
+        </div>
+        
+        <!-- Cart Footer -->
+        <div class="border-t-2 border-[var(--border-color)] pt-6">
+          <div class="flex justify-between items-center text-2xl font-bold mb-6">
+            <span>Total:</span>
+            <span id="cart-total" aria-label="Total Price">₹0</span>
+          </div>
+          
+          <!-- Action Buttons -->
+          <div class="flex flex-col space-y-4">
+            <div class="flex space-x-4">
+              <button id="proceed-checkout" class="flex-1 bg-[#0077be] dark:bg-[#00F0FF] text-white dark:text-black font-bold py-3 rounded-lg hover:opacity-90 transition-opacity">
+                <i class="fas fa-credit-card mr-2"></i> Proceed to Checkout
+              </button>
+              <button id="quick-buy" class="flex-1 bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition-colors">
+                <i class="fas fa-bolt mr-2"></i> Quick Buy
+              </button>
+            </div>
+            
+            <div class="flex justify-center">
+              <button id="empty-cart-btn" class="btn-danger" aria-label="Empty Cart">
+                🗑️ Empty Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- === ADDRESS MANAGEMENT MODAL === -->
+    <section id="address-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center" aria-hidden="true">
+      <div class="bg-[var(--card-bg)] p-8 rounded-lg shadow-lg w-full max-w-4xl relative" role="dialog" aria-modal="true">
+        <button id="close-address-modal" class="absolute top-4 right-4 text-2xl" aria-label="Close Address Modal">&times;</button>
+        
+        <h2 class="text-3xl font-white text-center mb-6">My Addresses</h2>
+        
+        <div class="mb-6">
+          <button id="add-new-address" class="btn-primary">
+            <i class="fas fa-plus mr-2"></i> Add New Address
+          </button>
+        </div>
+
+        <!-- Add/Edit Address Form -->
+        <div id="address-form-section" class="address-form hidden">
+          <h3 class="text-xl font-bold mb-4" id="address-form-title">Add New Address</h3>
+          <form id="address-form">
+            <input type="hidden" id="address-edit-id" value="">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="form-group">
+                <label for="address-full-name">Full Name</label>
+                <input type="text" id="address-full-name" placeholder="Enter your full name" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="address-mobile">Mobile Number</label>
+                <input type="tel" id="address-mobile" placeholder="+91 XXXXX XXXXX" required>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="address-line">Address Line</label>
+              <input type="text" id="address-line" placeholder="House No., Building, Street" required>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+              <div class="form-group">
+                <label for="address-city">City</label>
+                <input type="text" id="address-city" placeholder="City" required>
+              </div>
+              <div class="form-group">
+                <label for="address-pincode">PIN Code</label>
+                <input type="text" id="address-pincode" placeholder="PIN Code" required>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="address-state">State</label>
+              <select id="address-state" required>
+                <option value="">Select State</option>
+                <option value="andhra-pradesh">Andhra Pradesh</option>
+                <option value="arunachal-pradesh">Arunachal Pradesh</option>
+                <option value="assam">Assam</option>
+                <option value="bihar">Bihar</option>
+                <option value="chhattisgarh">Chhattisgarh</option>
+                <option value="goa">Goa</option>
+                <option value="gujarat">Gujarat</option>
+                <option value="haryana">Haryana</option>
+                <option value="himachal-pradesh">Himachal Pradesh</option>
+                <option value="jharkhand">Jharkhand</option>
+                <option value="karnataka">Karnataka</option>
+                <option value="kerala">Kerala</option>
+                <option value="madhya-pradesh">Madhya Pradesh</option>
+                <option value="maharashtra">Maharashtra</option>
+                <option value="manipur">Manipur</option>
+                <option value="meghalaya">Meghalaya</option>
+                <option value="mizoram">Mizoram</option>
+                <option value="nagaland">Nagaland</option>
+                <option value="odisha">Odisha</option>
+                <option value="punjab">Punjab</option>
+                <option value="rajasthan">Rajasthan</option>
+                <option value="sikkim">Sikkim</option>
+                <option value="tamil-nadu">Tamil Nadu</option>
+                <option value="telangana">Telangana</option>
+                <option value="tripura">Tripura</option>
+                <option value="uttar-pradesh">Uttar Pradesh</option>
+                <option value="uttarakhand">Uttarakhand</option>
+                <option value="west-bengal">West Bengal</option>
+  
+                <!-- Union Territories -->
+                <option value="andaman-nicobar">Andaman and Nicobar Islands</option>
+                <option value="chandigarh">Chandigarh</option>
+                <option value="dadra-nagar-haveli-daman-diu">Dadra and Nagar Haveli and Daman and Diu</option>
+                <option value="delhi">Delhi (NCT)</option>
+                <option value="jammu-kashmir">Jammu and Kashmir</option>              
+                <option value="ladakh">Ladakh</option>
+                <option value="lakshadweep">Lakshadweep</option>
+                <option value="puducherry">Puducherry</option>
+                
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="address-type">Address Type</label>
+              <select id="address-type" required>
+                <option value="">Select Type</option>
+                <option value="home">Home</option>
+                <option value="work">Work</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            
+            <div class="flex gap-4 mt-6">
+              <button type="submit" class="btn-primary">
+                <i class="fas fa-save mr-2"></i> Save Address
+              </button>
+              <button type="button" id="cancel-address-form" class="btn-secondary">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+        
+        <!-- Saved Addresses List -->
+        <div id="saved-addresses" class="mt-6">
+          <!-- Addresses will be populated here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- === ENHANCED CHECKOUT MODAL === -->
+    <section id="checkout-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center" aria-hidden="true">
+      <div class="checkout-modal bg-[var(--card-bg)] p-8 rounded-lg shadow-lg relative" role="dialog" aria-modal="true">
+        <button id="close-checkout" class="absolute top-4 right-4 text-2xl" aria-label="Close Checkout Modal">&times;</button>
+        
+        <!-- Checkout Steps -->
+        <div class="checkout-steps">
+          <div class="checkout-step active" data-step="1">
+            <div class="step-number">1</div>
+            <div class="step-label">Review Order</div>
+          </div>
+          <div class="checkout-step" data-step="2">
+            <div class="step-number">2</div>
+            <div class="step-label">Address</div>
+          </div>
+          <div class="checkout-step" data-step="3">
+            <div class="step-number">3</div>
+            <div class="step-label">Payment</div>
+          </div>
+          <div class="checkout-step" data-step="4">
+            <div class="step-number">4</div>
+            <div class="step-label">Confirmation</div>
+          </div>
+        </div>
+
+        <div id="checkout-content">
+          <!-- Step 1: Review Order -->
+          <div id="step-1" class="checkout-step-content">
+            <h3 class="text-2xl font-bold mb-6">Review Your Order</h3>
+            <div id="checkout-items" class="mb-6"></div>
+            
+            <!-- Offers Section -->
+            <div class="offers-section">
+              <h4 class="text-lg font-bold mb-3">
+                <i class="fas fa-tags text-yellow-500 mr-2"></i>
+                Available Offers
+              </h4>
+              <div class="offer-item">
+                <i class="fas fa-percentage text-yellow-500"></i>
+                <span>Get 10% off on orders above ₹5000 (Use code: STUDENT10)</span>
+              </div>
+              <div class="offer-item">
+                <i class="fas fa-gift text-yellow-500"></i>
+                <span>Free delivery on your first order</span>
+              </div>
+              <div class="offer-item">
+                <i class="fas fa-money-bill-wave text-yellow-500"></i>
+                <span>Extra 5% cashback with Student Cart Wallet</span>
+              </div>
+            </div>
+
+            <div class="flex justify-between items-center mt-6">
+              <div class="text-xl font-bold">Total: <span id="checkout-total">₹0</span></div>
+              <button class="btn-primary" onclick="nextStep()">Continue to Address</button>
+            </div>
+          </div>
+
+          <!-- Step 2: Address -->
+          <div id="step-2" class="checkout-step-content hidden">
+            <h3 class="text-2xl font-bold mb-6">Select Delivery Address</h3>
+            
+            <!-- Address Selection -->
+            <div id="checkout-address-selection" class="mb-6">
+              <!-- Addresses will be populated here -->
+            </div>
+            
+            <!-- Quick Add Address Form (minimal) -->
+            <div class="address-form">
+              <h4 class="text-lg font-bold mb-4">Or Add New Address</h4>
+              
+              <div class="form-group">
+                <label for="checkout-full-name">Full Name</label>
+                <input type="text" id="checkout-full-name" placeholder="Enter your full name" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="checkout-mobile">Mobile Number</label>
+                <input type="tel" id="checkout-mobile" placeholder="+91 XXXXX XXXXX" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="checkout-address">Address</label>
+                <input type="text" id="checkout-address" placeholder="House No., Building, Street" required>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-4">
+                <div class="form-group">
+                  <label for="checkout-city">City</label>
+                  <input type="text" id="checkout-city" placeholder="City" required>
+                </div>
+                <div class="form-group">
+                  <label for="checkout-pincode">PIN Code</label>
+                  <input type="text" id="checkout-pincode" placeholder="PIN Code" required>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="checkout-state">State</label>
+                <select id="checkout-state" required>
+                  <option value="">Select State</option>
+                  <option value="andhra-pradesh">Andhra Pradesh</option>
+                <option value="arunachal-pradesh">Arunachal Pradesh</option>
+                <option value="assam">Assam</option>
+                <option value="bihar">Bihar</option>
+                <option value="chhattisgarh">Chhattisgarh</option>
+                <option value="goa">Goa</option>
+                <option value="gujarat">Gujarat</option>
+                <option value="haryana">Haryana</option>
+                <option value="himachal-pradesh">Himachal Pradesh</option>
+                <option value="jharkhand">Jharkhand</option>
+                <option value="karnataka">Karnataka</option>
+                <option value="kerala">Kerala</option>
+                <option value="madhya-pradesh">Madhya Pradesh</option>
+                <option value="maharashtra">Maharashtra</option>
+                <option value="manipur">Manipur</option>
+                <option value="meghalaya">Meghalaya</option>
+                <option value="mizoram">Mizoram</option>
+                <option value="nagaland">Nagaland</option>
+                <option value="odisha">Odisha</option>
+                <option value="punjab">Punjab</option>
+                <option value="rajasthan">Rajasthan</option>
+                <option value="sikkim">Sikkim</option>
+                <option value="tamil-nadu">Tamil Nadu</option>
+                <option value="telangana">Telangana</option>
+                <option value="tripura">Tripura</option>
+                <option value="uttar-pradesh">Uttar Pradesh</option>
+                <option value="uttarakhand">Uttarakhand</option>
+                <option value="west-bengal">West Bengal</option>
+  
+                <!-- Union Territories -->
+                <option value="andaman-nicobar">Andaman and Nicobar Islands</option>
+                <option value="chandigarh">Chandigarh</option>
+                <option value="dadra-nagar-haveli-daman-diu">Dadra and Nagar Haveli and Daman and Diu</option>
+                <option value="delhi">Delhi (NCT)</option>
+                <option value="jammu-kashmir">Jammu and Kashmir</option>              
+                <option value="ladakh">Ladakh</option>
+                <option value="lakshadweep">Lakshadweep</option>
+                <option value="puducherry">Puducherry</option>
+                
+                </select>
+              </div>
+            </div>
+
+            <div class="delivery-info">
+              <div class="icon">
+                <i class="fas fa-truck"></i>
+              </div>
+              <div class="delivery-estimate">Expected Delivery: 2-3 Days</div>
+              <div>Free delivery for orders above ₹500</div>
+            </div>
+
+            <div class="flex justify-between mt-6">
+              <button class="btn-secondary" onclick="prevStep()">Back to Order Review</button>
+              <button class="btn-primary" onclick="nextStep()">Continue to Payment</button>
+            </div>
+          </div>
+
+          <!-- Step 3: Payment -->
+          <div id="step-3" class="checkout-step-content hidden">
+            <h3 class="text-2xl font-bold mb-6">Choose Payment Method</h3>
+            
+            <!-- Payment Methods Grid -->
+            <div class="payment-method-grid">
+              <!-- UPI Payment -->
+              <div class="payment-option" data-method="upi">
+                <div class="icon">
+                  <i class="fab fa-google-pay"></i>
+                </div>
+                <div class="title">UPI Payment</div>
+                <div class="description">Pay using Google Pay, PhonePe, Paytm & other UPI apps</div>
+              </div>
+
+              <!-- Card Payment -->
+              <div class="payment-option" data-method="card">
+                <div class="icon">
+                  <i class="fas fa-credit-card"></i>
+                </div>
+                <div class="title">Credit/Debit Card</div>
+                <div class="description">Visa, Mastercard, RuPay & American Express accepted</div>
+              </div>
+
+              <!-- Net Banking -->
+              <div class="payment-option" data-method="netbanking">
+                <div class="icon">
+                  <i class="fas fa-university"></i>
+                </div>
+                <div class="title">Net Banking</div>
+                <div class="description">Pay directly from your bank account</div>
+              </div>
+
+              <!-- Wallets -->
+              <div class="payment-option" data-method="wallet">
+                <div class="icon">
+                  <i class="fas fa-wallet"></i>
+                </div>
+                <div class="title">Digital Wallets</div>
+                <div class="description">Paytm, Mobikwik, Amazon Pay & more</div>
+              </div>
+
+              <!-- EMI -->
+              <div class="payment-option" data-method="emi">
+                <div class="icon">
+                  <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="title">EMI Options</div>
+                <div class="description">Convert to easy monthly installments</div>
+              </div>
+
+              <!-- Cash on Delivery -->
+              <div class="payment-option" data-method="cod">
+                <div class="icon">
+                  <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <div class="title">Cash on Delivery</div>
+                <div class="description">Pay when your order is delivered</div>
+              </div>
+            </div>
+
+              <!-- PhonePe QR – hidden until PhonePe is clicked -->
+            <div id="phonepe-qr-box" style="display:none; margin-top:20px; text-align:center;">
+            <img src="AccountQRCodeJio Payments Bank - 3763_DARK_THEME.png"
+                 alt="PhonePe QR Code"
+                 style="width:250px; height:auto; border:3px solid #6a0dad; border-radius:12px;">
+                p style="margin-top:10px; color:#888;">Scan this QR with PhonePe to pay</p>
+              </div>
+            </div> <!-- end of upi-form -->
+
+
+              <!-- Card Form -->
+              <div id="card-form" class="payment-form hidden">
+                <h4 class="text-lg font-bold mb-4">Card Payment Details</h4>
+                <div class="form-group">
+                  <label for="card-number">Card Number</label>
+                  <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="form-group">
+                    <label for="expiry">Expiry Date</label>
+                    <input type="text" id="expiry" placeholder="MM/YY" maxlength="5">
+                  </div>
+                  <div class="form-group">
+                    <label for="cvv">CVV</label>
+                    <input type="password" id="cvv" placeholder="123" maxlength="4">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="card-name">Cardholder Name</label>
+                  <input type="text" id="card-name" placeholder="Name as on card">
+                </div>
+                <div class="security-features">
+                  <div class="security-feature">
+                    <div class="icon"><i class="fas fa-lock"></i></div>
+                    <span>256-bit SSL Encryption</span>
+                  </div>
+                  <div class="security-feature">
+                    <div class="icon"><i class="fas fa-shield-alt"></i></div>
+                    <span>PCI DSS Compliant</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- EMI Form -->
+              <div id="emi-form" class="payment-form hidden">
+                <h4 class="text-lg font-bold mb-4">EMI Options</h4>
+                <div class="emi-options">
+                  <div class="emi-option" data-tenure="3">
+                    <div class="font-bold">3 Months</div>
+                    <div class="text-sm text-gray-500">₹2,167/month</div>
+                    <div class="text-xs">Total: ₹6,500</div>
+                  </div>
+                  <div class="emi-option" data-tenure="6">
+                    <div class="font-bold">6 Months</div>
+                    <div class="text-sm text-gray-500">₹1,125/month</div>
+                    <div class="text-xs">Total: ₹6,750</div>
+                  </div>
+                  <div class="emi-option" data-tenure="12">
+                    <div class="font-bold">12 Months</div>
+                    <div class="text-sm text-gray-500">₹583/month</div>
+                    <div class="text-xs">Total: ₹7,000</div>
+                  </div>
+                </div>
+                <div class="form-group mt-4">
+                  <label for="emi-card">Select Card for EMI</label>
+                  <select id="emi-card" required>
+                    <option value="">Choose your card</option>
+                    <option value="hdfc">HDFC Bank</option>
+                    <option value="icici">ICICI Bank</option>
+                    <option value="sbi">SBI</option>
+                    <option value="axis">Axis Bank</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Net Banking Form -->
+              <div id="netbanking-form" class="payment-form hidden">
+                <h4 class="text-lg font-bold mb-4">Select Your Bank</h4>
+                <div class="form-group">
+                  <label for="bank-select">Choose Bank</label>
+                  <select id="bank-select" required>
+                    <option value="">Select Your Bank</option>
+                    <option value="sbi">State Bank of India</option>
+                    <option value="hdfc">HDFC Bank</option>
+                    <option value="icici">ICICI Bank</option>
+                    <option value="axis">Axis Bank</option>
+                    <option value="kotak">Kotak Mahindra Bank</option>
+                    <option value="pnb">Punjab National Bank</option>
+                    <option value="other">Other Banks</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Wallet Form -->
+              <div id="wallet-form" class="payment-form hidden">
+                <h4 class="text-lg font-bold mb-4">Choose Digital Wallet</h4>
+                <div class="grid grid-cols-2 gap-3">
+                  <button class="wallet-option bg-blue-600 text-white p-4 rounded-lg" data-wallet="paytm">
+                    <i class="fas fa-wallet mb-2"></i><br>Paytm Wallet
+                  </button>
+                  <button class="wallet-option bg-purple-600 text-white p-4 rounded-lg" data-wallet="mobikwik">
+                    <i class="fas fa-mobile-alt mb-2"></i><br>Mobikwik
+                  </button>
+                  <button class="wallet-option bg-orange-600 text-white p-4 rounded-lg" data-wallet="amazonpay">
+                    <i class="fab fa-amazon mb-2"></i><br>Amazon Pay
+                  </button>
+                  <button class="wallet-option bg-green-600 text-white p-4 rounded-lg" data-wallet="freecharge">
+                    <i class="fas fa-bolt mb-2"></i><br>Freecharge
+                  </button>
+                </div>
+              </div>
+
+              <!-- COD Form -->
+              <div id="cod-form" class="payment-form hidden">
+                <h4 class="text-lg font-bold mb-4">Cash on Delivery</h4>
+                <div class="delivery-info">
+                  <div class="icon"><i class="fas fa-money-bill-wave"></i></div>
+                  <div class="delivery-estimate">Pay ₹<span id="cod-amount">0</span> when delivered</div>
+                  <div>Additional ₹50 handling charges may apply</div>
+                </div>
+                <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p class="text-sm">
+                    <i class="fas fa-info-circle text-yellow-500 mr-2"></i>
+                    Please keep exact change ready. Our delivery partner will collect the payment.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-between mt-6">
+              <button class="btn-secondary" onclick="prevStep()">Back to Address</button>
+              <button class="btn-primary" onclick="nextStep()" id="payment-proceed-btn" disabled>
+                <i class="fas fa-lock mr-2"></i>Place Order Securely
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 4: Confirmation -->
+          <div id="step-4" class="checkout-step-content hidden">
+            <div class="text-center">
+              <div class="text-6xl mb-4">
+                <i class="fas fa-check-circle text-green-500"></i>
+              </div>
+              <h3 class="text-3xl font-bold mb-4">Order Placed Successfully!</h3>
+              <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
+                <div class="text-lg font-bold mb-2">Order ID: <span id="order-id-display">#SC000000</span></div>
+                <div class="text-gray-600">Expected delivery: <span id="delivery-date-display">3-5 business days</span></div>
+              </div>
+              
+              <div class="flex justify-center gap-4 mt-6">
+                <button class="btn-primary" onclick="viewOrderTracking()">
+                  <i class="fas fa-truck mr-2"></i>Track Order
+                </button>
+                <button class="btn-secondary" onclick="closeAllModals()">
+                  Continue Shopping
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- === ORDER TRACKING MODAL === -->
+    <section id="tracking-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center" aria-hidden="true">
+      <div class="bg-[var(--card-bg)] p-8 rounded-lg shadow-lg w-full max-w-4xl relative" role="dialog" aria-modal="true">
+        <button id="close-tracking" class="absolute top-4 right-4 text-2xl" aria-label="Close Tracking Modal">&times;</button>
+        
+        <h2 class="text-3xl font-black text-center mb-6">Order Tracking</h2>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- Left Side: Tracking Progress -->
+          <div>
+            <div class="mb-6">
+              <h3 class="text-xl font-bold mb-2">Order #<span id="tracking-order-id">SC123456</span></h3>
+              <p class="text-gray-600">Placed on <span id="order-date">March 15, 2024</span></p>
+              <p class="mt-2">Status: <span id="order-status-display" class="font-bold"></span></p>
+            </div>
+
+            <div class="tracking-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" id="tracking-progress-fill" style="width: 25%;"></div>
+              </div>
+              
+              <div class="tracking-steps" id="tracking-steps-container">
+                <!-- Steps will be dynamically populated -->
+              </div>
+            </div>
+
+            <div class="delivery-info">
+              <div class="icon">
+                <i class="fas fa-shipping-fast"></i>
+              </div>
+              <div class="delivery-estimate" id="delivery-estimate-display">Expected Delivery: March 18, 2024</div>
+              <div id="delivery-status-text">Your order is being processed!</div>
+            </div>
+
+            <!-- Live Tracking Updates -->
+            <div class="mt-6">
+              <h4 class="font-bold mb-3">
+                <i class="fas fa-clock text-blue-500 mr-2"></i>
+                Recent Updates
+              </h4>
+              <div id="live-updates" class="space-y-3">
+                <!-- Updates will be dynamically populated -->
+              </div>
+            </div>
+
+            <!-- Cancellation Section -->
+            <div id="cancellation-section" class="cancellation-info">
+              <h4 class="text-lg font-bold mb-3">
+                <i class="fas fa-times-circle text-red-500 mr-2"></i>
+                Cancel Order
+              </h4>
+              <p class="text-sm mb-4">You can cancel your order before it ships. Once shipped, you can initiate a return instead.</p>
+              <button id="cancel-order-btn" class="btn-cancel w-full cancel-order-highlight" onclick="initiateCancellation()">
+                <i class="fas fa-ban mr-2"></i> Cancel This Order
+              </button>
+            </div>
+          </div>
+          
+          <!-- Right Side: Order Summary -->
+          <div>
+            <div class="order-summary">
+              <h4 class="text-lg font-bold mb-4">Order Summary</h4>
+              <div id="tracking-order-items">
+                <!-- Order items will be populated here -->
+              </div>
+              
+              <div class="border-t pt-4 mt-4">
+                <div class="flex justify-between mb-2">
+                  <span>Subtotal:</span>
+                  <span id="tracking-subtotal">₹0</span>
+                </div>
+                <div class="flex justify-between mb-2">
+                  <span>Delivery:</span>
+                  <span class="text-green-600" id="tracking-delivery">Free</span>
+                </div>
+                <div class="flex justify-between font-bold text-lg">
+                  <span>Total:</span>
+                  <span id="tracking-total">₹0</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Delivery Address -->
+            <div class="order-summary">
+              <h4 class="text-lg font-bold mb-4">
+                <i class="fas fa-map-marker-alt text-red-500 mr-2"></i>
+                Delivery Address
+              </h4>
+              <div id="tracking-delivery-address">
+                <!-- Address will be populated here -->
+              </div>
+            </div>
+
+            <!-- Support Options -->
+            <div class="order-summary">
+              <h4 class="text-lg font-bold mb-4">
+                <i class="fas fa-headset text-blue-500 mr-2"></i>
+                Need Help?
+              </h4>
+              <div class="space-y-3">
+                <button class="w-full text-left p-3 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <i class="fas fa-phone text-green-500 mr-3"></i>
+                  Call Customer Support: 1800-XXX-XXXX
+                </button>
+                <button class="w-full text-left p-3 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <i class="fas fa-comment text-blue-500 mr-3"></i>
+                  Chat with us
+                </button>
+                <button class="w-full text-left p-3 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <i class="fas fa-undo text-orange-500 mr-3"></i>
+                  Return/Exchange Request
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- My Orders Modal -->
+    <section id="orders-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center" aria-hidden="true">
+      <div class="bg-[var(--card-bg)] p-8 rounded-lg shadow-lg w-full max-w-5xl relative" role="dialog" aria-modal="true">
+        <button id="close-orders" class="absolute top-4 right-4 text-2xl" aria-label="Close Orders Modal">&times;</button>
+        
+        <h2 class="text-3xl font-black text-center mb-6">My Orders</h2>
+        
+        <div id="orders-list">
+          <!-- Orders will be populated here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Order Cancellation Modal -->
+    <section id="cancellation-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center" aria-hidden="true">
+      <div class="bg-[var(--card-bg)] p-8 rounded-lg shadow-lg w-full max-w-2xl relative" role="dialog" aria-modal="true">
+        <button id="close-cancellation" class="absolute top-4 right-4 text-2xl" aria-label="Close Cancellation Modal">&times;</button>
+        
+        <h2 class="text-2xl font-black text-center mb-6">Cancel Order</h2>
+        
+        <div class="cancellation-info mb-6">
+          <p class="mb-4">Please select a reason for cancellation:</p>
+          
+          <div class="cancellation-reasons">
+            <div class="cancellation-reason" data-reason="changed-mind">
+              <i class="fas fa-user-times mr-2"></i>
+              Changed my mind
+            </div>
+            <div class="cancellation-reason" data-reason="found-better-price">
+              <i class="fas fa-tags mr-2"></i>
+              Found better price elsewhere
+            </div>
+            <div class="cancellation-reason" data-reason="ordered-by-mistake">
+              <i class="fas fa-exclamation-triangle mr-2"></i>
+              Ordered by mistake
+            </div>
+            <div class="cancellation-reason" data-reason="payment-issues">
+              <i class="fas fa-credit-card mr-2"></i>
+              Payment issues
+            </div>
+            <div class="cancellation-reason" data-reason="other">
+              <i class="fas fa-question-circle mr-2"></i>
+              Other reasons
+            </div>
+          </div>
+          
+          <div class="form-group mt-4">
+            <label for="cancellation-comments">Additional Comments (Optional)</label>
+            <textarea id="cancellation-comments" placeholder="Tell us more about why you're cancelling..." rows="3"></textarea>
+          </div>
+        </div>
+        
+        <div class="flex justify-between">
+          <button class="btn-secondary" onclick="closeCancellationModal()">Keep Order</button>
+          <button class="btn-danger" id="confirm-cancellation" onclick="confirmCancellation()" disabled>
+            <i class="fas fa-ban mr-2"></i> Cancel Order
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Order Detail Modal -->
+    <section id="order-detail-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center" aria-hidden="true">
+      <div class="bg-[var(--card-bg)] p-8 rounded-lg shadow-lg w-full max-w-4xl relative" role="dialog" aria-modal="true">
+        <button id="close-order-detail" class="absolute top-4 right-4 text-2xl" aria-label="Close Order Detail Modal">&times;</button>
+        
+        <div id="order-detail-content">
+          <!-- Order detail content will be populated here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Confirmation Dialog -->
+    <div id="confirmation-dialog" class="confirmation-dialog hidden">
+      <div class="confirmation-content">
+        <h3 class="confirmation-title" id="confirmation-title">Confirm Action</h3>
+        <p class="confirmation-message" id="confirmation-message">Are you sure you want to proceed?</p>
+        <div class="confirmation-buttons">
+          <button class="btn-secondary" id="confirmation-cancel">Cancel</button>
+          <button class="btn-danger" id="confirmation-confirm">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="container mx-auto text-center py-10 mt-20 border-t-2 border-[var(--border-color)]">
+      <p id="company-name-footer" class="text-lg font-bold">Student Cart</p>
+      <p id="contact-info-footer" class="text-sm text-gray-400">support@studentcart.com | +91 123 456 7890</p>
+    </footer>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Configuration & Data
+      const COMPANY_NAME = "Student Cart";
+      const CONTACT_EMAIL = "support@studentcart.com";
+      const CONTACT_PHONE = "+91 123 456 7890";
+      const CATEGORIES = [
+        { name: "Electronics" }, { name: "Books" },
+        { name: "Stationery" }, { name: "Appliances" },
+        { name: "Furniture" }, { name: "Bed Matters" },
+        { name: "Mobile" }, { name: "Laptops" }
+      ];
+      const PRODUCTS = [
+        { 
+          id: 1, 
+          name: "Gaming Laptop", 
+          category: "Laptops", 
+          price: 65000, 
+          trustScore: 92, 
+          condition: "Excellent",
+          image: "https://images.pexels.com/photos/2047905/pexels-photo-2047905.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop"
+        },
+        { 
+          id: 2, 
+          name: "Ergonomic Chair", 
+          category: "Furniture", 
+          price: 8000, 
+          trustScore: 88, 
+          condition: "Good",
+          image: "https://images.pexels.com/photos/586996/pexels-photo-586996.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop"
+        },
+        { 
+          id: 3, 
+          name: "Calculus Textbook", 
+          category: "Books", 
+          price: 500, 
+          trustScore: 95, 
+          condition: "Excellent",
+          image: "https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop"
+        },
+        { 
+          id: 4, 
+          name: "iPhone 13", 
+          category: "Mobile", 
+          price: 55000, 
+          trustScore: 85, 
+          condition: "Good",
+          image: "https://images.pexels.com/photos/788946/pexels-photo-788946.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop"
+        },
+        { 
+          id: 5, 
+          name: "Memory Foam Mattress", 
+          category: "Bed Matters", 
+          price: 12000, 
+          trustScore: 78, 
+          condition: "Fair",
+          image: "https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop"
+        },
+        { 
+          id: 6, 
+          name: "Microwave Oven", 
+          category: "Appliances", 
+          price: 4500, 
+          trustScore: 82, 
+          condition: "Good",
+          image: "https://images.pexels.com/photos/4686822/pexels-photo-4686822.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop"
+        },
+        { 
+          id: 7, 
+          name: "Mechanical Pencils", 
+          category: "Stationery", 
+          price: 200, 
+          trustScore: 90, 
+          condition: "Excellent",
+          image: "https://images.pexels.com/photos/159644/art-supplies-brushes-rulers-scissors-159644.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop"
+        },
+        { 
+          id: 8, 
+          name: "Noise-Cancelling Headphones", 
+          category: "Electronics", 
+          price: 15000, 
+          trustScore: 87, 
+          condition: "Good",
+          image: "https://images.pexels.com/photos/3394650/pexels-photo-3394650.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop"
+        }
+      ];
+
+      let cart = [];
+      let orders = [];
+      let addresses = [];
+      let currentTheme = localStorage.getItem('theme') || 'dark';
+      let currentUser = null;
+      let currentCheckoutStep = 1;
+      let selectedPaymentMethod = null;
+      let currentOrderId = null;
+      let selectedCheckoutAddress = null;
+      let currentOrderForTracking = null;
+      let currentOrderForCancellation = null;
+      let selectedCancellationReason = null;
+
+      // Real-time order tracking intervals
+      let trackingIntervals = new Map();
+
+      // Video Call Variables
+      let localStream = null;
+      let remoteStream = null;
+      let peerConnection = null;
+      let callStartTime = null;
+      let callTimer = null;
+      let isMicMuted = false;
+      let isCameraOff = false;
+      let cameras = [];
+      let microphones = [];
+      let currentCameraIndex = 0;
+      let isInCall = false;
+
+      // DOM Elements
+      const themeToggle = document.getElementById('theme-toggle');
+      const particleCanvas = document.getElementById('particle-background');
+      const ctx = particleCanvas.getContext('2d');
+      const customCursor = document.querySelector('.custom-cursor');
+      const hubCategories = document.getElementById('hub-categories');
+      const productGrid = document.getElementById('product-grid');
+      const priceSort = document.getElementById('price-sort');
+      const categoryFilter = document.getElementById('category-filter');
+      const loginModal = document.getElementById('login');
+      const cartModal = document.getElementById('cart-modal');
+      const checkoutModal = document.getElementById('checkout-modal');
+      const trackingModal = document.getElementById('tracking-modal');
+      const ordersModal = document.getElementById('orders-modal');
+      const addressModal = document.getElementById('address-modal');
+      const cancellationModal = document.getElementById('cancellation-modal');
+      const orderDetailModal = document.getElementById('order-detail-modal');
+      const cartItemsContainer = document.getElementById('cart-items');
+      const cartTotalEl = document.getElementById('cart-total');
+      const cartItemCountEl = document.getElementById('cart-item-count');
+
+      const authLink = document.getElementById('auth-link');
+      const userSessionDiv = document.getElementById('user-session');
+      const welcomeMessage = document.getElementById('welcome-message');
+      const logoutButton = document.getElementById('logout-button');
+      const loginTab = document.getElementById('login-tab');
+      const registerTab = document.getElementById('register-tab');
+      const loginForm = document.getElementById('login-form');
+      const registerForm = document.getElementById('register-form');
+      const authMessage = document.getElementById('auth-message');
+
+      // Video Call Elements
+      const localVideo = document.getElementById('localVideo');
+      const remoteVideo = document.getElementById('remoteVideo');
+      const preCallInterface = document.getElementById('preCallInterface');
+      const videoCallInterface = document.getElementById('videoCallInterface');
+      const videoControls = document.getElementById('videoControls');
+      const callStatus = document.getElementById('callStatus');
+      const callTimerEl = document.getElementById('callTimer');
+      const incomingCall = document.getElementById('incomingCall');
+
+      // Address Management Elements
+      const addressForm = document.getElementById('address-form');
+      const addressFormSection = document.getElementById('address-form-section');
+      const savedAddresses = document.getElementById('saved-addresses');
+
+      // Confirmation Dialog Elements
+      const confirmationDialog = document.getElementById('confirmation-dialog');
+      const confirmationTitle = document.getElementById('confirmation-title');
+      const confirmationMessage = document.getElementById('confirmation-message');
+      const confirmationCancel = document.getElementById('confirmation-cancel');
+      const confirmationConfirm = document.getElementById('confirmation-confirm');
+
+      // Hash function for passwords (simple)
+      const simpleHash = str => {
+        let hash = 0;
+        for(let i=0; i<str.length; i++) {
+          hash = (hash<<5) - hash + str.charCodeAt(i);
+          hash |= 0;
+        }
+        return hash.toString();
+      };
+
+      // Storage functions
+      const getUserKey = (key) => currentUser ? `${currentUser}_${key}` : key;
+
+      const getUsersFromStorage = () => JSON.parse(localStorage.getItem('website_users') || '[]');
+      const saveUsersToStorage = users => localStorage.setItem('website_users', JSON.stringify(users));
+
+      const getOrdersFromStorage = () => JSON.parse(localStorage.getItem(getUserKey('user_orders')) || '[]');
+      const saveOrdersToStorage = orders => localStorage.setItem(getUserKey('user_orders'), JSON.stringify(orders));
+
+      const getAddressesFromStorage = () => JSON.parse(localStorage.getItem(getUserKey('user_addresses')) || '[]');
+      const saveAddressesToStorage = addresses => localStorage.setItem(getUserKey('user_addresses'), JSON.stringify(addresses));
+
+      const updateUIForAuthState = () => {
+        if(currentUser) {
+          authLink.classList.add('hidden');
+          userSessionDiv.classList.remove('hidden');
+          welcomeMessage.textContent = `Welcome, ${currentUser.split('@')[0]}!`;
+          
+          // Load user-specific data
+          orders = getOrdersFromStorage();
+          addresses = getAddressesFromStorage();
+        } else {
+          authLink.classList.remove('hidden');
+          userSessionDiv.classList.add('hidden');
+          welcomeMessage.textContent = '';
+          
+          // Clear user data
+          orders = [];
+          addresses = [];
+        }
+      };
+
+      // Theme toggle icons
+      const moonIcon = `<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>`;
+      const sunIcon = `<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 12a5 5 0 100-10 5 5 0 000 10z" /></svg>`;
+
+      function applyTheme(theme) {
+        localStorage.setItem('theme', theme);
+        document.documentElement.className = theme;
+        themeToggle.innerHTML = theme === 'dark' ? sunIcon : moonIcon;
+        initParticles();
+      }
+
+      themeToggle.addEventListener('click', () => {
+        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        applyTheme(currentTheme);
+      });
+
+      // Particle animation
+      let particles = [];
+      function resizeCanvas() {
+        particleCanvas.width = window.innerWidth;
+        particleCanvas.height = window.innerHeight;
+      }
+      class Particle {
+        constructor() {
+          this.x = Math.random() * particleCanvas.width;
+          this.y = Math.random() * particleCanvas.height;
+          this.size = Math.random() * 1.5 + 1;
+          this.speedX = (Math.random() * 0.4 - 0.2);
+          this.speedY = (Math.random() * 0.4 - 0.2);
+          this.color = currentTheme === 'dark' ? `rgba(0, 119, 190, ${Math.random() * 0.5 + 0.1})` : `rgba(0, 0, 0, ${Math.random() * 0.1 + 0.05})`;
+        }
+        update() {
+          this.x += this.speedX;
+          this.y += this.speedY;
+          if(this.x > particleCanvas.width || this.x < 0) this.speedX *= -1;
+          if(this.y > particleCanvas.height || this.y < 0) this.speedY *= -1;
+        }
+        draw() {
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+          ctx.fill();
+        }
+      }
+      function initParticles() {
+        particles = [];
+        const num = Math.floor((particleCanvas.width * particleCanvas.height)/15000);
+        for(let i=0; i<num; i++) particles.push(new Particle());
+      }
+      function animateParticles() {
+        ctx.clearRect(0,0,particleCanvas.width, particleCanvas.height);
+        particles.forEach(p => {p.update(); p.draw()});
+        requestAnimationFrame(animateParticles);
+      }
+
+      window.addEventListener('mousemove', e => {
+        customCursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+      });
+
+      // Populate categories & products
+      function populateContent() {
+        hubCategories.innerHTML = CATEGORIES.map(cat => `
+          <div class="interactive-card rounded-lg p-8 hub-card" data-category="${cat.name}">
+            <img src="https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop" alt="${cat.name}" class="card-image" />
+            <div class="card-content">
+              <h3 class="text-2xl font-bold mb-2">${cat.name}</h3>
+              <p class="text-gray-400">Browse our collection of ${cat.name.toLowerCase()}.</p>
+            </div>
+          </div>
+        `).join('');
+
+        priceSort.innerHTML = `<option value="">Sort by</option><option value="low-to-high">Low to High</option><option value="high-to-low">High to Low</option>`;
+        categoryFilter.innerHTML = `<option value="All">All Categories</option>` + CATEGORIES.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+        renderProducts();
+      }
+
+      // Render product grid with enhanced layout
+      function renderProducts() {
+        let filteredProducts = [...PRODUCTS];
+        if(categoryFilter.value !== 'All') {
+          filteredProducts = filteredProducts.filter(p => p.category === categoryFilter.value);
+        }
+        if(priceSort.value === 'low-to-high') filteredProducts.sort((a,b) => a.price - b.price);
+        else if(priceSort.value === 'high-to-low') filteredProducts.sort((a,b) => b.price - a.price);
+
+        // Helper functions
+        const getTrustBadgeClass = (score) => {
+          if (score >= 90) return 'trust-excellent';
+          if (score >= 80) return 'trust-good';
+          if (score >= 70) return 'trust-fair';
+          return 'trust-bad';
+        };
+
+        const getTrustLabel = (score) => {
+          if (score >= 90) return 'Excellent';
+          if (score >= 80) return 'Good';
+          if (score >= 70) return 'Fair';
+          return 'Bad';
+        };
+
+        const getConditionClass = (condition) => {
+          return `condition-${condition.toLowerCase()}`;
+        };
+
+        productGrid.innerHTML = filteredProducts.map(p => {
+          const cartItem = cart.find(item => item.id === p.id);
+          
+          return `
+            <div class="interactive-card rounded-lg p-6">
+              <div class="card-content">
+                <img src="${p.image}" alt="${p.name}" class="product-image" />
+                
+                <!-- Trust Score -->
+                <div class="product-trust-score">
+                  <span>🛡️</span>
+                  <span>Trust: ${p.trustScore}/100</span>
+                  <span class="trust-badge ${getTrustBadgeClass(p.trustScore)}">${getTrustLabel(p.trustScore)}</span>
+                </div>
+                
+                <h3 class="text-xl font-bold mb-2">${p.name}</h3>
+                <p class="text-sm text-gray-400 mb-2">
+                  ${p.category}
+                  <span class="condition-badge ${getConditionClass(p.condition)}">${p.condition}</span>
+                </p>
+                <p class="text-lg text-[var(--accent-color)] mb-4">₹${p.price.toLocaleString()}</p>
+                
+                <!-- Product Controls Row -->
+                <div class="flex items-center justify-between gap-3 mt-4">
+                  <!-- Add to Cart Button -->
+                  <button data-product-id="${p.id}" class="add-to-cart-btn btn-primary flex-1">
+                    🛒 Add to Cart
+                  </button>
+                  
+                  <!-- Right Side Controls -->
+                  <div class="flex items-center gap-2">
+                    ${cartItem ? `
+                      <!-- Quantity Controls -->
+                      <div class="flex items-center gap-1">
+                        <button class="cart-qty-btn" data-action="decrease" data-product-id="${p.id}">−</button>
+                        <span class="quantity-display text-sm">${cartItem.quantity}</span>
+                        <button class="cart-qty-btn" data-action="increase" data-product-id="${p.id}">+</button>
+                      </div>
+                    ` : ''}
+                    
+                    <!-- Buy Button -->
+                    <button data-product-id="${p.id}" class="buy-now-btn bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm font-bold transition-colors">
+                      ⚡ Buy
+                    </button>
+                    
+                    <!-- Video Call Button -->
+                    <button data-product-id="${p.id}" class="video-call-btn" onclick="initiateVideoCall(${p.id})">
+                      📹 Video
+                    </button>
+                  </div>
+                </div>
+                
+                ${cartItem ? `<p class="text-sm text-green-500 mt-2 text-center">✓ Added to Cart</p>` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      priceSort.addEventListener('change', renderProducts);
+      categoryFilter.addEventListener('change', renderProducts);
+
+      // Add to cart logic
+      function addToCart(productId) {
+        const product = PRODUCTS.find(p => p.id === productId);
+        const existing = cart.find(item => item.id === productId);
+        if(existing) existing.quantity++;
+        else cart.push({...product, quantity:1});
+        updateCartDisplay();
+        showNotification('🛒 Item added to cart successfully!');
+      }
+
+      // Buy Now function
+      function buyNow(productId) {
+        const product = PRODUCTS.find(p => p.id === productId);
+        if(product) {
+          // Clear cart and add only this product
+          cart = [{...product, quantity: 1}];
+          updateCartDisplay();
+          toggleModal('checkout-modal', true);
+          showNotification(`⚡ Quick buy initiated for ${product.name}`);
+        }
+      }
+
+      // Update cart display
+      function updateCartDisplay() {
+        let total = 0;
+        let count = 0;
+        
+        if(cart.length === 0) {
+          cartItemsContainer.innerHTML = `
+            <div class="empty-cart-message">
+              <p>Your cart is empty.</p>
+              <p class="text-sm mt-2">Add some items to get started!</p>
+            </div>
+          `;
+        } else {
+          cartItemsContainer.innerHTML = cart.map(item => {
+            total += item.price * item.quantity;
+            count += item.quantity;
+            
+            return `
+              <div class="cart-item">
+                <div class="cart-item-info">
+                  <h4 class="font-bold text-lg">${item.name}</h4>
+                  <p class="text-sm text-gray-400">${item.category}</p>
+                  <p class="text-sm text-[var(--accent-color)]">₹${item.price.toLocaleString()} each</p>
+                </div>
+                
+                <div class="cart-item-controls">
+                  <div class="quantity-controls">
+                    <button class="cart-modal-qty-btn" data-action="decrease" data-product-id="${item.id}">−</button>
+                    <span class="quantity-display">${item.quantity}</span>
+                    <button class="cart-modal-qty-btn" data-action="increase" data-product-id="${item.id}">+</button>
+                  </div>
+                  
+                  <div class="cart-item-price">
+                    ₹${(item.price * item.quantity).toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+        
+        cartTotalEl.innerText = `₹${total.toLocaleString()}`;
+        cartItemCountEl.innerText = count;
+        cartItemCountEl.classList.toggle('hidden', count === 0);
+        renderProducts(); // refresh product grid
+      }
+
+      // Modal toggler
+      function toggleModal(id, show) {
+        const el = document.getElementById(id);
+        el.classList.toggle('hidden', !show);
+        el.classList.toggle('flex', show);
+        el.setAttribute('aria-hidden', !show);
+      }
+
+      // Address Management Functions
+      function generateAddressId() {
+        return 'addr_' + Date.now().toString(36) + Math.random().toString(36).substr(2);
+      }
+
+      function renderSavedAddresses() {
+        if (addresses.length === 0) {
+          savedAddresses.innerHTML = `
+            <div class="text-center py-8">
+              <i class="fas fa-map-marker-alt text-4xl text-gray-400 mb-4"></i>
+              <p class="text-lg text-gray-500">No saved addresses</p>
+              <p class="text-sm text-gray-400">Add your first address to get started!</p>
+            </div>
+          `;
+          return;
+        }
+
+        savedAddresses.innerHTML = addresses.map(address => `
+          <div class="address-card" data-address-id="${address.id}">
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <h4 class="font-bold text-lg mb-2">
+                  ${address.fullName}
+                  <span class="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded ml-2">${address.type}</span>
+                </h4>
+                <p class="text-sm text-gray-600 mb-1">${address.mobile}</p>
+                <div class="text-sm text-gray-700">
+                  <p>${address.addressLine}</p>
+                  <p>${address.city}, ${address.state} - ${address.pincode}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="address-actions">
+              <button class="btn-primary" onclick="editAddress('${address.id}')">
+                <i class="fas fa-edit mr-1"></i> Edit
+              </button>
+              <button class="btn-danger" onclick="deleteAddress('${address.id}')">
+                <i class="fas fa-trash mr-1"></i> Delete
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      function clearAddressForm() {
+        document.getElementById('address-edit-id').value = '';
+        document.getElementById('address-full-name').value = '';
+        document.getElementById('address-mobile').value = '';
+        document.getElementById('address-line').value = '';
+        document.getElementById('address-city').value = '';
+        document.getElementById('address-pincode').value = '';
+        document.getElementById('address-state').value = '';
+        document.getElementById('address-type').value = '';
+        document.getElementById('address-form-title').textContent = 'Add New Address';
+      }
+
+      function showAddressForm() {
+        addressFormSection.classList.remove('hidden');
+        clearAddressForm();
+      }
+
+      function hideAddressForm() {
+        addressFormSection.classList.add('hidden');
+      }
+
+      window.editAddress = function(addressId) {
+        const address = addresses.find(a => a.id === addressId);
+        if (!address) return;
+
+        document.getElementById('address-edit-id').value = address.id;
+        document.getElementById('address-full-name').value = address.fullName;
+        document.getElementById('address-mobile').value = address.mobile;
+        document.getElementById('address-line').value = address.addressLine;
+        document.getElementById('address-city').value = address.city;
+        document.getElementById('address-pincode').value = address.pincode;
+        document.getElementById('address-state').value = address.state;
+        document.getElementById('address-type').value = address.type;
+        document.getElementById('address-form-title').textContent = 'Edit Address';
+        
+        showAddressForm();
+      };
+
+      window.deleteAddress = function(addressId) {
+        const address = addresses.find(a => a.id === addressId);
+        if (!address) return;
+
+        showConfirmation(
+          'Delete Address',
+          `Are you sure you want to delete the address for ${address.fullName}?`,
+          () => {
+            addresses = addresses.filter(a => a.id !== addressId);
+            saveAddressesToStorage(addresses);
+            renderSavedAddresses();
+            showNotification('🗑️ Address deleted successfully!');
+          }
+        );
+      };
+
+      function renderCheckoutAddresses() {
+        const checkoutAddressSelection = document.getElementById('checkout-address-selection');
+        
+        if (addresses.length === 0) {
+          checkoutAddressSelection.innerHTML = `
+            <div class="text-center py-4 border rounded-lg">
+              <p class="text-gray-500 mb-2">No saved addresses found</p>
+              <p class="text-sm text-gray-400">Please add a new address below</p>
+            </div>
+          `;
+          return;
+        }
+
+        checkoutAddressSelection.innerHTML = `
+          <h4 class="text-lg font-bold mb-4">Select from Saved Addresses</h4>
+          ${addresses.map(address => `
+            <div class="address-card cursor-pointer" data-address-id="${address.id}" onclick="selectCheckoutAddress('${address.id}')">
+              <div class="flex items-start">
+                <input type="radio" name="checkout-address" value="${address.id}" class="mt-1 mr-3">
+                <div class="flex-1">
+                  <h5 class="font-bold">
+                    ${address.fullName}
+                    <span class="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded ml-2">${address.type}</span>
+                  </h5>
+                  <p class="text-sm text-gray-600">${address.mobile}</p>
+                  <div class="text-sm text-gray-700 mt-1">
+                    <p>${address.addressLine}</p>
+                    <p>${address.city}, ${address.state} - ${address.pincode}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        `;
+      }
+
+      window.selectCheckoutAddress = function(addressId) {
+        document.querySelectorAll('#checkout-address-selection .address-card').forEach(card => {
+          card.classList.remove('selected');
+        });
+        
+        const selectedCard = document.querySelector(`#checkout-address-selection .address-card[data-address-id="${addressId}"]`);
+        if (selectedCard) {
+          selectedCard.classList.add('selected');
+          const radio = selectedCard.querySelector('input[type="radio"]');
+          if (radio) radio.checked = true;
+        }
+        
+        selectedCheckoutAddress = addresses.find(a => a.id === addressId);
+      };
+
+      // Checkout Functions
+      function populateCheckoutItems() {
+        const checkoutItems = document.getElementById('checkout-items');
+        const checkoutTotal = document.getElementById('checkout-total');
+        
+        let total = 0;
+        checkoutItems.innerHTML = cart.map(item => {
+          total += item.price * item.quantity;
+          return `
+            <div class="order-item">
+              <img src="${item.image}" alt="${item.name}" class="order-item-image">
+              <div class="order-item-details">
+                <div class="order-item-name">${item.name}</div>
+                <div class="text-sm text-gray-500">Qty: ${item.quantity}</div>
+                <div class="order-item-price">₹${(item.price * item.quantity).toLocaleString()}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+        checkoutTotal.textContent = `₹${total.toLocaleString()}`;
+        document.getElementById('cod-amount').textContent = total.toLocaleString();
+      }
+
+      function setCheckoutStep(step) {
+        currentCheckoutStep = step;
+        
+        // Update step indicators
+        document.querySelectorAll('.checkout-step').forEach((stepEl, index) => {
+          stepEl.classList.toggle('active', index + 1 === step);
+          stepEl.classList.toggle('completed', index + 1 < step);
+        });
+        
+        // Show/hide step content
+        document.querySelectorAll('.checkout-step-content').forEach((content, index) => {
+          content.classList.toggle('hidden', index + 1 !== step);
+        });
+        
+        if (step === 1) {
+          populateCheckoutItems();
+        } else if (step === 2) {
+          renderCheckoutAddresses();
+        }
+      }
+
+      window.nextStep = function() {
+        if (currentCheckoutStep < 4) {
+          if (currentCheckoutStep === 2) {
+            // Validate address selection or form
+            const selectedRadio = document.querySelector('input[name="checkout-address"]:checked');
+            const hasFormData = document.getElementById('checkout-full-name').value.trim() && 
+                               document.getElementById('checkout-address').value.trim();
+            
+            if (!selectedRadio && !hasFormData) {
+              showNotification('Please select an address or fill in the address form');
+              return;
+            }
+            
+            // If using form data, create temporary address
+            if (!selectedRadio && hasFormData) {
+              selectedCheckoutAddress = {
+                fullName: document.getElementById('checkout-full-name').value,
+                mobile: document.getElementById('checkout-mobile').value,
+                addressLine: document.getElementById('checkout-address').value,
+                city: document.getElementById('checkout-city').value,
+                pincode: document.getElementById('checkout-pincode').value,
+                state: document.getElementById('checkout-state').value,
+                type: 'delivery'
+              };
+            }
+          }
+          
+          if (currentCheckoutStep === 3 && !selectedPaymentMethod) {
+            showNotification('Please select a payment method');
+            return;
+          }
+          
+          setCheckoutStep(currentCheckoutStep + 1);
+          
+          if (currentCheckoutStep === 4) {
+            processOrder();
+          }
+        }
+      };
+
+      window.prevStep = function() {
+        if (currentCheckoutStep > 1) {
+          setCheckoutStep(currentCheckoutStep - 1);
+        }
+      };
+
+      function processOrder() {
+        const orderId = 'SC' + Date.now().toString().slice(-6);
+        currentOrderId = orderId;
+        const orderDate = new Date();
+        
+        const orderData = {
+          id: orderId,
+          date: orderDate.toLocaleDateString(),
+          time: orderDate.toLocaleTimeString(),
+          timestamp: orderDate.getTime(),
+          items: [...cart],
+          total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+          paymentMethod: selectedPaymentMethod,
+          address: selectedCheckoutAddress,
+          status: 'Order Placed',
+          canCancel: true,
+          trackingSteps: [
+            { 
+              name: 'Order Placed', 
+              completed: true, 
+              active: false,
+              time: orderDate.toLocaleTimeString(),
+              date: orderDate.toLocaleDateString(),
+              description: 'Your order has been placed successfully'
+            },
+            { 
+              name: 'Confirmed', 
+              completed: false, 
+              active: true,
+              time: '', 
+              date: '',
+              description: 'Your order is being confirmed'
+            },
+            { 
+              name: 'Packed', 
+              completed: false, 
+              active: false,
+              time: '', 
+              date: '',
+              description: 'Your order is being packed'
+            },
+            { 
+              name: 'Shipped', 
+              completed: false, 
+              active: false,
+              time: '', 
+              date: '',
+              description: 'Your order has been shipped'
+            },
+            { 
+              name: 'Out for Delivery', 
+              completed: false, 
+              active: false,
+              time: '', 
+              date: '',
+              description: 'Your order is out for delivery'
+            },
+            { 
+              name: 'Delivered', 
+              completed: false, 
+              active: false,
+              time: '', 
+              date: '',
+              description: 'Your order has been delivered'
+            }
+          ],
+          updates: [
+            {
+              time: orderDate.toLocaleString(),
+              message: `Order #${orderId} has been placed successfully`,
+              status: 'success'
+            }
+          ]
+        };
+        
+        orders.push(orderData);
+        saveOrdersToStorage(orders);
+        
+        document.getElementById('order-id-display').textContent = orderId;
+        document.getElementById('delivery-date-display').textContent = '3-5 business days';
+        
+        // Start real-time order tracking simulation - FIXED: Much longer intervals
+        startOrderTracking(orderId);
+        
+        cart = [];
+        updateCartDisplay();
+        
+        showNotification(`🎉 Order ${orderId} placed successfully! You can cancel it within reasonable time.`);
+      }
+
+      // FIXED: Real-time Order Tracking System with longer delays
+      function startOrderTracking(orderId) {
+        const order = orders.find(o => o.id === orderId);
+        if (!order) return;
+
+        // Clear any existing interval for this order
+        if (trackingIntervals.has(orderId)) {
+          clearInterval(trackingIntervals.get(orderId));
+        }
+
+        let currentStepIndex = 1; // Start from 'Confirmed' step
+        
+        const interval = setInterval(() => {
+          if (currentStepIndex >= order.trackingSteps.length || order.status === 'Cancelled') {
+            clearInterval(interval);
+            trackingIntervals.delete(orderId);
+            return;
+          }
+
+          const currentTime = new Date();
+          const currentStep = order.trackingSteps[currentStepIndex];
+          const prevStep = order.trackingSteps[currentStepIndex - 1];
+          
+          // Complete previous step
+          if (prevStep) {
+            prevStep.active = false;
+            prevStep.completed = true;
+          }
+          
+          // Activate current step
+          currentStep.completed = true;
+          currentStep.active = false;
+          currentStep.time = currentTime.toLocaleTimeString();
+          currentStep.date = currentTime.toLocaleDateString();
+          
+          // Update order status
+          switch (currentStepIndex) {
+            case 1: 
+              order.status = 'Confirmed'; 
+              order.canCancel = true; // Still cancellable
+              break;
+            case 2: 
+              order.status = 'Packed'; 
+              order.canCancel = true; // Still cancellable
+              break;
+            case 3: 
+              order.status = 'Shipped'; 
+              order.canCancel = false; // No longer cancellable once shipped
+              break;
+            case 4: 
+              order.status = 'Out for Delivery'; 
+              order.canCancel = false;
+              break;
+            case 5: 
+              order.status = 'Delivered'; 
+              order.canCancel = false;
+              break;
+          }
+          
+          // Add update to order
+          order.updates.push({
+            time: currentTime.toLocaleString(),
+            message: `${currentStep.description} at ${currentStep.time}`,
+            status: 'info'
+          });
+          
+          // Activate next step if exists
+          if (currentStepIndex + 1 < order.trackingSteps.length) {
+            order.trackingSteps[currentStepIndex + 1].active = true;
+          }
+          
+          currentStepIndex++;
+          
+          // Save updated order
+          saveOrdersToStorage(orders);
+          
+          // Update tracking UI if modal is open and showing this order
+          if (currentOrderForTracking && currentOrderForTracking.id === orderId) {
+            updateTrackingUI(order);
+          }
+          
+          // Show real-time notification
+          const messages = [
+            '📋 Order confirmed by seller',
+            '📦 Your order is being packed',
+            '🚚 Order shipped successfully',
+            '🏃‍♂️ Out for delivery',
+            '✅ Order delivered successfully'
+          ];
+          
+          if (currentStepIndex <= messages.length) {
+            showNotification(`${messages[currentStepIndex - 1]} - Order #${orderId}`);
+          }
+          
+        }, Math.random() * 30000 + 45000); // FIXED: Much longer random interval between 45-75 seconds
+        
+        trackingIntervals.set(orderId, interval);
+      }
+
+      function updateTrackingUI(order) {
+        // Update order status
+        const statusMap = {
+          'Order Placed': 'order-status-active',
+          'Confirmed': 'order-status-confirmed',
+          'Packed': 'order-status-packed',
+          'Shipped': 'order-status-shipped',
+          'Out for Delivery': 'order-status-out-for-delivery',
+          'Delivered': 'order-status-delivered',
+          'Cancelled': 'order-status-cancelled'
+        };
+        
+        const statusElement = document.getElementById('order-status-display');
+        statusElement.textContent = order.status;
+        statusElement.className = `font-bold ${statusMap[order.status] || 'order-status-active'}`;
+        
+        // Update tracking steps
+        renderTrackingSteps(order);
+        
+        // Update live updates
+        renderLiveUpdates(order);
+        
+        // Update cancellation section
+        updateCancellationSection(order);
+      }
+
+      function renderTrackingSteps(order) {
+        const stepsContainer = document.getElementById('tracking-steps-container');
+        const completedSteps = order.trackingSteps.filter(step => step.completed).length;
+        const progressPercentage = (completedSteps / order.trackingSteps.length) * 100;
+        
+        document.getElementById('tracking-progress-fill').style.width = `${progressPercentage}%`;
+        
+        stepsContainer.innerHTML = order.trackingSteps.map(step => `
+          <div class="tracking-step ${step.completed ? 'completed' : ''} ${step.active ? 'active' : ''}">
+            <div class="step-icon">
+              ${step.completed ? '<i class="fas fa-check"></i>' : 
+                step.active ? '<i class="fas fa-clock"></i>' : 
+                getStepIcon(step.name)}
+            </div>
+            <div class="step-title">${step.name}</div>
+            <div class="step-time">${step.time ? `${step.date} ${step.time}` : 'Pending'}</div>
+          </div>
+        `).join('');
+      }
+
+      function getStepIcon(stepName) {
+        const icons = {
+          'Order Placed': '<i class="fas fa-shopping-cart"></i>',
+          'Confirmed': '<i class="fas fa-check-circle"></i>',
+          'Packed': '<i class="fas fa-box"></i>',
+          'Shipped': '<i class="fas fa-truck"></i>',
+          'Out for Delivery': '<i class="fas fa-shipping-fast"></i>',
+          'Delivered': '<i class="fas fa-home"></i>'
+        };
+        return icons[stepName] || '<i class="fas fa-circle"></i>';
+      }
+
+      function renderLiveUpdates(order) {
+        const updatesContainer = document.getElementById('live-updates');
+        const recentUpdates = order.updates.slice(-5).reverse();
+        
+        updatesContainer.innerHTML = recentUpdates.map(update => `
+          <div class="real-time-update">
+            <div class="font-semibold">${update.message}</div>
+            <div class="text-xs">${update.time}</div>
+          </div>
+        `).join('');
+      }
+
+      function updateCancellationSection(order) {
+        const cancellationSection = document.getElementById('cancellation-section');
+        const cancelBtn = document.getElementById('cancel-order-btn');
+        
+        if (!order.canCancel || order.status === 'Cancelled' || order.status === 'Delivered') {
+          cancellationSection.style.display = 'none';
+        } else {
+          cancellationSection.style.display = 'block';
+          
+          // Add highlight for newly placed orders that are still cancellable
+          if (order.canCancel && (order.status === 'Order Placed' || order.status === 'Confirmed' || order.status === 'Packed')) {
+            cancelBtn.classList.add('cancel-order-highlight');
+          } else {
+            cancelBtn.classList.remove('cancel-order-highlight');
+          }
+          
+          if (order.status === 'Shipped' || order.status === 'Out for Delivery') {
+            cancelBtn.innerHTML = '<i class="fas fa-undo mr-2"></i> Request Return';
+            cancelBtn.onclick = () => showNotification('Return request feature coming soon!');
+          }
+        }
+      }
+
+      window.viewOrderTracking = function() {
+        if (currentOrderId) {
+          const order = orders.find(o => o.id === currentOrderId);
+          if (order) {
+            populateOrderTracking(order);
+            toggleModal('checkout-modal', false);
+            toggleModal('tracking-modal', true);
+          }
+        }
+      };
+
+      window.closeAllModals = function() {
+        ['checkout-modal', 'tracking-modal', 'cart-modal', 'cancellation-modal', 'order-detail-modal'].forEach(modalId => {
+          toggleModal(modalId, false);
+        });
+        currentCheckoutStep = 1;
+        selectedPaymentMethod = null;
+        selectedCheckoutAddress = null;
+        currentOrderForTracking = null;
+        currentOrderForCancellation = null;
+      };
+
+      function populateOrderTracking(order) {
+        currentOrderForTracking = order;
+        
+        document.getElementById('tracking-order-id').textContent = order.id;
+        document.getElementById('order-date').textContent = order.date;
+        
+        // Populate order items with click handlers
+        const trackingItems = document.getElementById('tracking-order-items');
+        trackingItems.innerHTML = order.items.map(item => `
+          <div class="order-item" onclick="showOrderItemDetail('${order.id}', ${item.id})">
+            <img src="${item.image}" alt="${item.name}" class="order-item-image">
+            <div class="order-item-details">
+              <div class="order-item-name">${item.name}</div>
+              <div class="text-sm text-gray-500">Qty: ${item.quantity}</div>
+              <div class="order-item-price">₹${(item.price * item.quantity).toLocaleString()}</div>
+            </div>
+            <div class="text-xs text-gray-400 mt-2">
+              <i class="fas fa-mouse-pointer mr-1"></i> Click for details
+            </div>
+          </div>
+        `).join('');
+        
+        // Populate totals
+        document.getElementById('tracking-subtotal').textContent = `₹${order.total.toLocaleString()}`;
+        document.getElementById('tracking-total').textContent = `₹${order.total.toLocaleString()}`;
+        
+        // Populate delivery address
+        const trackingAddress = document.getElementById('tracking-delivery-address');
+        if (order.address) {
+          trackingAddress.innerHTML = `
+            <div class="font-semibold">${order.address.fullName}</div>
+            <div>${order.address.addressLine}</div>
+            <div>${order.address.city}, ${order.address.state} - ${order.address.pincode}</div>
+            <div class="text-sm text-gray-600 mt-2">${order.address.mobile}</div>
+          `;
+        }
+        
+        // Update tracking display
+        updateTrackingUI(order);
+      }
+
+      // ===== FIXED BACK TO TRACKING FUNCTION =====
+      window.showOrderItemDetail = function(orderId, itemId) {
+        const order = orders.find(o => o.id === orderId);
+        const item = order ? order.items.find(i => i.id === itemId) : null;
+        
+        if (!order || !item) return;
+        
+        const orderDetailContent = document.getElementById('order-detail-content');
+        orderDetailContent.innerHTML = `
+          <h2 class="text-2xl font-bold mb-6">Item Details</h2>
+          
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div>
+              <img src="${item.image}" alt="${item.name}" class="w-full h-64 object-cover rounded-lg mb-4">
+              <h3 class="text-xl font-bold mb-2">${item.name}</h3>
+              <p class="text-gray-600 mb-2">Category: ${item.category}</p>
+              <p class="text-gray-600 mb-2">Condition: <span class="condition-badge ${item.condition.toLowerCase()}">${item.condition}</span></p>
+              <p class="text-2xl font-bold text-blue-600">₹${item.price.toLocaleString()}</p>
+            </div>
+            
+            <div>
+              <h4 class="text-lg font-bold mb-4">Order Information</h4>
+              <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                <div class="flex justify-between mb-2">
+                  <span>Order ID:</span>
+                  <span class="font-mono">#${order.id}</span>
+                </div>
+                <div class="flex justify-between mb-2">
+                  <span>Order Date:</span>
+                  <span>${order.date}</span>
+                </div>
+                <div class="flex justify-between mb-2">
+                  <span>Status:</span>
+                  <span class="order-status-${order.status.toLowerCase().replace(/\s+/g, '-')}">${order.status}</span>
+                </div>
+                <div class="flex justify-between mb-2">
+                  <span>Quantity:</span>
+                  <span>${item.quantity}</span>
+                </div>
+                <div class="flex justify-between font-bold text-lg">
+                  <span>Total:</span>
+                  <span>₹${(item.price * item.quantity).toLocaleString()}</span>
+                </div>
+              </div>
+              
+              <h4 class="text-lg font-bold mb-4">Delivery Address</h4>
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="font-semibold">${order.address.fullName}</div>
+                <div>${order.address.addressLine}</div>
+                <div>${order.address.city}, ${order.address.state} - ${order.address.pincode}</div>
+                <div class="text-sm text-gray-600 mt-2">${order.address.mobile}</div>
+              </div>
+              
+              <div class="mt-6 flex gap-4">
+                <button class="btn-primary" onclick="backToTracking('${order.id}')">
+                  <i class="fas fa-arrow-left mr-2"></i> Back to Tracking
+                </button>
+                ${order.canCancel && order.status !== 'Cancelled' ? `
+                  <button class="btn-cancel" onclick="initiateCancellation('${order.id}')">
+                    <i class="fas fa-ban mr-2"></i> Cancel Order
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+        
+        toggleModal('tracking-modal', false);
+        toggleModal('order-detail-modal', true);
+      };
+
+      // ===== NEW BACK TO TRACKING FUNCTION =====
+      window.backToTracking = function(orderId) {
+        const order = orders.find(o => o.id === orderId);
+        if (order) {
+          // Close order detail modal
+          toggleModal('order-detail-modal', false);
+          
+          // Set the current order for tracking
+          currentOrderForTracking = order;
+          
+          // Refresh the tracking data and UI
+          populateOrderTracking(order);
+          
+          // Open tracking modal
+          toggleModal('tracking-modal', true);
+          
+          console.log('Navigated back to tracking for order:', orderId);
+        } else {
+          showNotification('❌ Order not found');
+        }
+      };
+
+      function populateOrdersList() {
+        const ordersList = document.getElementById('orders-list');
+        
+        if (orders.length === 0) {
+          ordersList.innerHTML = `
+            <div class="text-center py-8">
+              <i class="fas fa-shopping-bag text-4xl text-gray-400 mb-4"></i>
+              <p class="text-lg text-gray-500">No orders found</p>
+              <p class="text-sm text-gray-400">Start shopping to see your orders here!</p>
+            </div>
+          `;
+          return;
+        }
+        
+        // Sort orders by timestamp (newest first)
+        const sortedOrders = [...orders].sort((a, b) => b.timestamp - a.timestamp);
+        
+        ordersList.innerHTML = sortedOrders.map(order => {
+          const canCancel = order.canCancel && order.status !== 'Cancelled' && order.status !== 'Delivered';
+          const statusClass = 
+            order.status === 'Cancelled' ? 'order-status-cancelled' : 
+            order.status === 'Delivered' ? 'order-status-delivered' :
+            order.status === 'Shipped' || order.status === 'Out for Delivery' ? 'order-status-shipped' :
+            'order-status-active';
+          
+          return `
+            <div class="order-summary mb-6">
+              <div class="flex justify-between items-start mb-4">
+                <div>
+                  <h3 class="text-xl font-bold">Order #${order.id}</h3>
+                  <p class="text-gray-600">Placed on ${order.date} at ${order.time}</p>
+                  <p class="text-sm mt-1">Status: <span class="${statusClass}">${order.status}</span></p>
+                  <p class="text-sm text-gray-500">Payment: ${order.paymentMethod.toUpperCase()}</p>
+                </div>
+                <div class="text-right">
+                  <div class="text-lg font-bold">₹${order.total.toLocaleString()}</div>
+                  <div class="flex gap-2 mt-2">
+                    <button class="btn-primary" onclick="trackOrder('${order.id}')">
+                      <i class="fas fa-truck mr-1"></i> Track Order
+                    </button>
+                    ${canCancel ? `
+                      <button class="btn-cancel cancel-order-highlight" onclick="initiateCancellation('${order.id}')">
+                        <i class="fas fa-times mr-1"></i> Cancel
+                      </button>
+                    ` : ''}
+                  </div>
+                </div>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                ${order.items.slice(0, 3).map(item => `
+                  <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors" 
+                       onclick="showOrderItemDetail('${order.id}', ${item.id})">
+                    <img src="${item.image}" alt="${item.name}" class="w-12 h-12 rounded object-cover">
+                    <div>
+                      <div class="font-semibold text-sm">${item.name}</div>
+                      <div class="text-xs text-gray-500">Qty: ${item.quantity}</div>
+                      <div class="text-xs text-blue-600">Click for details</div>
+                    </div>
+                  </div>
+                `).join('')}
+                ${order.items.length > 3 ? `
+                  <div class="text-sm text-gray-500 p-3 border-2 border-dashed border-gray-300 rounded-lg text-center">
+                    <div>+${order.items.length - 3} more items</div>
+                    <div class="text-xs">Click Track Order to see all</div>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      window.trackOrder = function(orderId) {
+        const order = orders.find(o => o.id === orderId);
+        if (order) {
+          populateOrderTracking(order);
+          toggleModal('orders-modal', false);
+          toggleModal('tracking-modal', true);
+        }
+      };
+
+      // Enhanced Cancellation System
+      window.initiateCancellation = function(orderId = null) {
+        const orderToCancel = orderId ? orders.find(o => o.id === orderId) : currentOrderForTracking;
+        if (!orderToCancel) return;
+        
+        if (!orderToCancel.canCancel || orderToCancel.status === 'Cancelled' || orderToCancel.status === 'Delivered') {
+          showNotification('❌ This order cannot be cancelled');
+          return;
+        }
+        
+        currentOrderForCancellation = orderToCancel;
+        
+        // Reset cancellation form
+        selectedCancellationReason = null;
+        document.getElementById('cancellation-comments').value = '';
+        document.getElementById('confirm-cancellation').disabled = true;
+        document.querySelectorAll('.cancellation-reason').forEach(el => el.classList.remove('selected'));
+        
+        // Show cancellation modal
+        toggleModal('cancellation-modal', true);
+      };
+
+      window.closeCancellationModal = function() {
+        toggleModal('cancellation-modal', false);
+        currentOrderForCancellation = null;
+        selectedCancellationReason = null;
+      };
+
+      window.confirmCancellation = function() {
+        if (!currentOrderForCancellation || !selectedCancellationReason) return;
+        
+        const comments = document.getElementById('cancellation-comments').value;
+        
+        // Update order status
+        currentOrderForCancellation.status = 'Cancelled';
+        currentOrderForCancellation.canCancel = false;
+        
+        // Add cancellation update
+        const cancelTime = new Date();
+        currentOrderForCancellation.updates.push({
+          time: cancelTime.toLocaleString(),
+          message: `Order cancelled: ${selectedCancellationReason}${comments ? ` - ${comments}` : ''}`,
+          status: 'cancelled'
+        });
+        
+        // Stop real-time tracking
+        if (trackingIntervals.has(currentOrderForCancellation.id)) {
+          clearInterval(trackingIntervals.get(currentOrderForCancellation.id));
+          trackingIntervals.delete(currentOrderForCancellation.id);
+        }
+        
+        // Save changes
+        saveOrdersToStorage(orders);
+        
+        // Close modal and refresh UI
+        closeCancellationModal();
+        populateOrdersList();
+        
+        // Update tracking UI if open
+        if (currentOrderForTracking && currentOrderForTracking.id === currentOrderForCancellation.id) {
+          updateTrackingUI(currentOrderForCancellation);
+        }
+        
+        showNotification(`✅ Order #${currentOrderForCancellation.id} has been cancelled successfully`);
+      };
+
+      // Confirmation Dialog Functions
+      function showConfirmation(title, message, onConfirm) {
+        confirmationTitle.textContent = title;
+        confirmationMessage.textContent = message;
+        confirmationDialog.classList.remove('hidden');
+        
+        // Remove previous event listeners
+        const newConfirmBtn = confirmationConfirm.cloneNode(true);
+        confirmationConfirm.parentNode.replaceChild(newConfirmBtn, confirmationConfirm);
+        
+        // Add new event listener
+        newConfirmBtn.addEventListener('click', () => {
+          confirmationDialog.classList.add('hidden');
+          onConfirm();
+        });
+      }
+
+      function hideConfirmation() {
+        confirmationDialog.classList.add('hidden');
+      }
+
+      // Authentication handlers
+      loginTab.addEventListener('click', () => {
+        loginTab.classList.add('active');
+        registerTab.classList.remove('active');
+        loginForm.classList.remove('hidden');
+        registerForm.classList.add('hidden');
+        authMessage.textContent = '';
+      });
+
+      registerTab.addEventListener('click', () => {
+        registerTab.classList.add('active');
+        loginTab.classList.remove('active');
+        registerForm.classList.remove('hidden');
+        loginForm.classList.add('hidden');
+        authMessage.textContent = '';
+      });
+
+      registerForm.addEventListener('submit', e => {
+        e.preventDefault();
+        const email = document.getElementById('register-email').value;
+        const password = document.getElementById('register-password').value;
+        let users = getUsersFromStorage();
+
+        if(!email || !password) {
+          authMessage.style.color = 'red';
+          authMessage.textContent = 'Email and password cannot be empty.';
+          return;
+        }
+        if(users.find(u => u.email === email)) {
+          authMessage.style.color = 'red';
+          authMessage.textContent = 'User already exists!';
+          return;
+        }
+
+        const hashedPassword = simpleHash(password);
+        users.push({email, password: hashedPassword});
+        saveUsersToStorage(users);
+
+        authMessage.style.color = 'green';
+        authMessage.textContent = 'Registration successful! Please login.';
+        registerForm.reset();
+      });
+
+      loginForm.addEventListener('submit', e => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        const users = getUsersFromStorage();
+
+        const user = users.find(u => u.email === email);
+        const hashedPassword = simpleHash(password);
+
+        if(user && user.password === hashedPassword) {
+          currentUser = user.email;
+          sessionStorage.setItem('website_currentUser', currentUser);
+          authMessage.style.color = 'green';
+          authMessage.textContent = 'Login Successful!';
+          setTimeout(() => {
+            toggleModal('login', false);
+            loginForm.reset();
+            updateUIForAuthState();
+          }, 1000);
+        } else {
+          authMessage.style.color = 'red';
+          authMessage.textContent = 'Invalid email or password.';
+        }
+      });
+
+      logoutButton.addEventListener('click', () => {
+        // Clear all tracking intervals
+        trackingIntervals.forEach((interval, orderId) => {
+          clearInterval(interval);
+        });
+        trackingIntervals.clear();
+        
+        currentUser = null;
+        sessionStorage.removeItem('website_currentUser');
+        updateUIForAuthState();
+        showNotification('👋 You have been logged out.');
+      });
+
+      // Address Form Handlers
+      document.getElementById('add-new-address').addEventListener('click', showAddressForm);
+      document.getElementById('cancel-address-form').addEventListener('click', hideAddressForm);
+
+      addressForm.addEventListener('submit', e => {
+        e.preventDefault();
+        
+        const addressData = {
+          id: document.getElementById('address-edit-id').value || generateAddressId(),
+          fullName: document.getElementById('address-full-name').value,
+          mobile: document.getElementById('address-mobile').value,
+          addressLine: document.getElementById('address-line').value,
+          city: document.getElementById('address-city').value,
+          pincode: document.getElementById('address-pincode').value,
+          state: document.getElementById('address-state').value,
+          type: document.getElementById('address-type').value
+        };
+        
+        const isEdit = !!document.getElementById('address-edit-id').value;
+        
+        if (isEdit) {
+          const index = addresses.findIndex(a => a.id === addressData.id);
+          if (index !== -1) {
+            addresses[index] = addressData;
+            showNotification('📍 Address updated successfully!');
+          }
+        } else {
+          addresses.push(addressData);
+          showNotification('📍 Address added successfully!');
+        }
+        
+        saveAddressesToStorage(addresses);
+        renderSavedAddresses();
+        hideAddressForm();
+      });
+
+      // Confirmation Dialog Handlers
+      confirmationCancel.addEventListener('click', hideConfirmation);
+
+      // === VIDEO CALL FUNCTIONALITY ===
+
+      // Initialize media devices
+      async function initializeDevices() {
+        try {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          cameras = devices.filter(device => device.kind === 'videoinput');
+          microphones = devices.filter(device => device.kind === 'audioinput');
+          
+          populateDeviceSelectors();
+        } catch (error) {
+          console.error('Error accessing media devices:', error);
+        }
+      }
+
+      function populateDeviceSelectors() {
+        const cameraSelect = document.getElementById('cameraSelect');
+        const micSelect = document.getElementById('micSelect');
+        
+        cameraSelect.innerHTML = '<option value="">Select Camera</option>';
+        cameras.forEach((camera, index) => {
+          const option = document.createElement('option');
+          option.value = camera.deviceId;
+          option.textContent = camera.label || `Camera ${index + 1}`;
+          cameraSelect.appendChild(option);
+        });
+        
+        micSelect.innerHTML = '<option value="">Select Microphone</option>';
+        microphones.forEach((mic, index) => {
+          const option = document.createElement('option');
+          option.value = mic.deviceId;
+          option.textContent = mic.label || `Microphone ${index + 1}`;
+          micSelect.appendChild(option);
+        });
+      }
+
+      // Pre-call controls
+      window.togglePreMic = function() {
+        const btn = document.getElementById('preMicBtn');
+        isMicMuted = !isMicMuted;
+        
+        if (isMicMuted) {
+          btn.classList.add('muted');
+          btn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+        } else {
+          btn.classList.remove('muted');
+          btn.innerHTML = '<i class="fas fa-microphone"></i>';
+        }
+      };
+
+      window.togglePreCamera = function() {
+        const btn = document.getElementById('preCameraBtn');
+        isCameraOff = !isCameraOff;
+        
+        if (isCameraOff) {
+          btn.classList.add('off');
+          btn.innerHTML = '<i class="fas fa-video-slash"></i>';
+        } else {
+          btn.classList.remove('off');
+          btn.innerHTML = '<i class="fas fa-video"></i>';
+        }
+      };
+
+      window.changeCamera = function() {
+        const select = document.getElementById('cameraSelect');
+        const selectedDeviceId = select.value;
+        console.log('Switching to camera:', selectedDeviceId);
+      };
+
+      window.changeMicrophone = function() {
+        const select = document.getElementById('micSelect');
+        const selectedDeviceId = select.value;
+        console.log('Switching to microphone:', selectedDeviceId);
+      };
+
+      // Main video call functions
+      window.startVideoCall = async function() {
+        try {
+          const constraints = {
+            video: !isCameraOff,
+            audio: !isMicMuted
+          };
+          
+          localStream = await navigator.mediaDevices.getUserMedia(constraints);
+          localVideo.srcObject = localStream;
+          
+          preCallInterface.style.display = 'none';
+          videoCallInterface.style.display = 'block';
+          videoControls.style.display = 'flex';
+          callStatus.style.display = 'block';
+          callTimerEl.style.display = 'block';
+          
+          startCallTimer();
+          
+          isInCall = true;
+          
+          setTimeout(() => {
+            simulateRemoteStream();
+          }, 2000);
+          
+          showNotification('📹 Video call started successfully!');
+          
+        } catch (error) {
+          console.error('Error starting video call:', error);
+          showNotification('❌ Failed to start video call. Please check permissions.');
+          resetCallInterface();
+        }
+      };
+
+      function simulateRemoteStream() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 640;
+        canvas.height = 480;
+        const ctx = canvas.getContext('2d');
+        
+        function drawPattern() {
+          ctx.fillStyle = '#1a1a1a';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          
+          ctx.fillStyle = '#00F0FF';
+          ctx.font = '48px Orbitron';
+          ctx.textAlign = 'center';
+          ctx.fillText('Remote User', canvas.width/2, canvas.height/2 - 50);
+          ctx.fillText('Connected', canvas.width/2, canvas.height/2 + 50);
+          
+          const time = Date.now() * 0.001;
+          ctx.fillStyle = `rgba(0, 240, 255, ${0.5 + 0.3 * Math.sin(time)})`;
+          ctx.beginPath();
+          ctx.arc(canvas.width/2, canvas.height/2 + 100, 20, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        
+        drawPattern();
+        setInterval(drawPattern, 100);
+        
+        const stream = canvas.captureStream(30);
+        remoteVideo.srcObject = stream;
+      }
+
+      function startCallTimer() {
+        callStartTime = Date.now();
+        callTimer = setInterval(() => {
+          const elapsed = Date.now() - callStartTime;
+          const minutes = Math.floor(elapsed / 60000);
+          const seconds = Math.floor((elapsed % 60000) / 1000);
+          callTimerEl.textContent = 
+            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }, 1000);
+      }
+
+      window.toggleMicrophone = function() {
+        const btn = document.getElementById('micBtn');
+        isMicMuted = !isMicMuted;
+        
+        if (localStream) {
+          const audioTrack = localStream.getAudioTracks()[0];
+          if (audioTrack) {
+            audioTrack.enabled = !isMicMuted;
+          }
+        }
+        
+        if (isMicMuted) {
+          btn.classList.add('muted');
+          btn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+        } else {
+          btn.classList.remove('muted');
+          btn.innerHTML = '<i class="fas fa-microphone"></i>';
+        }
+      };
+
+      window.toggleCamera = function() {
+        const btn = document.getElementById('cameraBtn');
+        isCameraOff = !isCameraOff;
+        
+        if (localStream) {
+          const videoTrack = localStream.getVideoTracks()[0];
+          if (videoTrack) {
+            videoTrack.enabled = !isCameraOff;
+          }
+        }
+        
+        if (isCameraOff) {
+          btn.classList.add('off');
+          btn.innerHTML = '<i class="fas fa-video-slash"></i>';
+        } else {
+          btn.classList.remove('off');
+          btn.innerHTML = '<i class="fas fa-video"></i>';
+        }
+      };
+
+      window.switchCamera = function() {
+        if (cameras.length > 1) {
+          currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
+          const selectedCamera = cameras[currentCameraIndex];
+          
+          if (localStream) {
+            const videoTrack = localStream.getVideoTracks()[0];
+            if (videoTrack) {
+              videoTrack.stop();
+            }
+            
+            navigator.mediaDevices.getUserMedia({
+              video: { deviceId: selectedCamera.deviceId },
+              audio: true
+            }).then(stream => {
+              localVideo.srcObject = stream;
+              localStream = stream;
+            }).catch(console.error);
+          }
+          
+          showNotification('🔄 Camera switched');
+        }
+      };
+
+      window.openSettings = function() {
+        showNotification('⚙️ Settings panel - Coming soon!');
+      };
+
+      window.hangUpCall = function() {
+        if (localStream) {
+          localStream.getTracks().forEach(track => track.stop());
+          localStream = null;
+        }
+        
+        if (remoteStream) {
+          remoteStream.getTracks().forEach(track => track.stop());
+          remoteStream = null;
+        }
+        
+        resetCallInterface();
+        showNotification('📞 Call ended');
+      };
+
+      function resetCallInterface() {
+        if (callTimer) {
+          clearInterval(callTimer);
+          callTimer = null;
+        }
+        
+        preCallInterface.style.display = 'flex';
+        videoCallInterface.style.display = 'none';
+        videoControls.style.display = 'none';
+        callStatus.style.display = 'none';
+        callTimerEl.style.display = 'none';
+        
+        isMicMuted = false;
+        isCameraOff = false;
+        isInCall = false;
+        
+        document.getElementById('preMicBtn').classList.remove('muted');
+        document.getElementById('preMicBtn').innerHTML = '<i class="fas fa-microphone"></i>';
+        document.getElementById('preCameraBtn').classList.remove('off');
+        document.getElementById('preCameraBtn').innerHTML = '<i class="fas fa-video"></i>';
+        
+        localVideo.srcObject = null;
+        remoteVideo.srcObject = null;
+      }
+
+      window.simulateIncomingCall = function() {
+        incomingCall.style.display = 'block';
+      };
+
+      window.acceptCall = function() {
+        incomingCall.style.display = 'none';
+        startVideoCall();
+      };
+
+      window.rejectCall = function() {
+        incomingCall.style.display = 'none';
+        showNotification('📞 Call declined');
+      };
+
+      window.initiateVideoCall = function(productId) {
+        const product = PRODUCTS.find(p => p.id === productId);
+        if (product) {
+          showNotification(`📹 Initiating video call for ${product.name}...`);
+          document.getElementById('video-section').scrollIntoView({ behavior: 'smooth' });
+          
+          setTimeout(() => {
+            simulateIncomingCall();
+          }, 1500);
+        }
+      };
+
+      // Notification system
+      function showNotification(message) {
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg z-[9999] shadow-lg';
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          notification.remove();
+        }, 3000);
+      }
+
+      // Global Click Listener
+      document.addEventListener('click', e => {
+        // Modal controls
+        if(e.target.closest('.nav-link[data-target="login"]')) {
+          authMessage.textContent = '';
+          toggleModal('login', true);
+        }
+        if(e.target.closest('#close-login')) toggleModal('login', false);
+        if(e.target.closest('.nav-link[data-target="cart-modal"]')) toggleModal('cart-modal', true);
+        if(e.target.closest('#close-cart')) toggleModal('cart-modal', false);
+        if(e.target.closest('#close-checkout')) {
+          toggleModal('checkout-modal', false);
+          currentCheckoutStep = 1;
+          selectedPaymentMethod = null;
+          selectedCheckoutAddress = null;
+        }
+        if(e.target.closest('#close-tracking')) {
+          toggleModal('tracking-modal', false);
+          currentOrderForTracking = null;
+        }
+        if(e.target.closest('.nav-link[data-target="orders-modal"]')) {
+          if (!currentUser) {
+            showNotification('Please login to view your orders');
+            return;
+          }
+          populateOrdersList();
+          toggleModal('orders-modal', true);
+        }
+        if(e.target.closest('#close-orders')) toggleModal('orders-modal', false);
+        if(e.target.closest('.nav-link[data-target="address-modal"]')) {
+          if (!currentUser) {
+            showNotification('Please login to manage your addresses');
+            return;
+          }
+          renderSavedAddresses();
+          toggleModal('address-modal', true);
+        }
+        if(e.target.closest('#close-address-modal')) {
+          toggleModal('address-modal', false);
+          hideAddressForm();
+        }
+        if(e.target.closest('#close-cancellation')) {
+          closeCancellationModal();
+        }
+        if(e.target.closest('#close-order-detail')) {
+          toggleModal('order-detail-modal', false);
+        }
+
+        // Cancellation reason selection
+        if(e.target.closest('.cancellation-reason')) {
+          document.querySelectorAll('.cancellation-reason').forEach(el => el.classList.remove('selected'));
+          e.target.closest('.cancellation-reason').classList.add('selected');
+          selectedCancellationReason = e.target.closest('.cancellation-reason').dataset.reason;
+          document.getElementById('confirm-cancellation').disabled = false;
+        }
+
+        // Checkout buttons
+        if(e.target.closest('#proceed-checkout')) {
+          if (!currentUser) {
+            showNotification('Please login to proceed with checkout');
+            return;
+          }
+          if(cart.length > 0) {
+            toggleModal('cart-modal', false);
+            toggleModal('checkout-modal', true);
+            setCheckoutStep(1);
+          } else {
+            showNotification('❌ Your cart is empty!');
+          }
+        }
+
+        if(e.target.closest('#quick-buy')) {
+          if (!currentUser) {
+            showNotification('Please login to proceed with quick buy');
+            return;
+          }
+          if(cart.length > 0) {
+            toggleModal('cart-modal', false);
+            toggleModal('checkout-modal', true);
+            setCheckoutStep(3); // Skip to payment
+          } else {
+            showNotification('❌ Your cart is empty!');
+          }
+        }
+
+        // Payment method selection
+        if(e.target.closest('.payment-option')) {
+          const paymentOption = e.target.closest('.payment-option');
+          const method = paymentOption.dataset.method;
+          
+          document.querySelectorAll('.payment-option').forEach(option => {
+            option.classList.remove('selected');
+          });
+          paymentOption.classList.add('selected');
+          
+          selectedPaymentMethod = method;
+          
+          // Show/hide payment forms
+          document.querySelectorAll('.payment-form').forEach(form => {
+            form.classList.add('hidden');
+          });
+          
+          const targetForm = document.getElementById(`${method}-form`);
+          if (targetForm) {
+            targetForm.classList.remove('hidden');
+          }
+          
+          document.getElementById('payment-proceed-btn').disabled = false;
+        }
+
+        // EMI option selection
+        if(e.target.closest('.emi-option')) {
+          document.querySelectorAll('.emi-option').forEach(option => {
+            option.classList.remove('selected');
+          });
+          e.target.closest('.emi-option').classList.add('selected');
+        }
+
+        // Add to cart
+        if(e.target.classList.contains('add-to-cart-btn')) {
+          const productId = parseInt(e.target.dataset.productId);
+          addToCart(productId);
+        }
+
+        // Buy Now
+        if(e.target.classList.contains('buy-now-btn')) {
+          const productId = parseInt(e.target.dataset.productId);
+          buyNow(productId);
+        }
+
+        // Quantity controls in product grid
+        if(e.target.classList.contains('cart-qty-btn')) {
+          const productId = parseInt(e.target.dataset.productId);
+          const action = e.target.dataset.action;
+          const cartItem = cart.find(item => item.id === productId);
+          if(!cartItem) return;
+          if(action === 'increase') cartItem.quantity++;
+          else if(action === 'decrease') {
+            cartItem.quantity--;
+            if(cartItem.quantity <= 0) cart = cart.filter(item => item.id !== productId);
+          }
+          updateCartDisplay();
+          e.preventDefault();
+        }
+
+        // Quantity controls in cart modal
+        if(e.target.classList.contains('cart-modal-qty-btn')) {
+          const productId = parseInt(e.target.dataset.productId);
+          const action = e.target.dataset.action;
+          const cartItem = cart.find(item => item.id === productId);
+          if(!cartItem) return;
+          if(action === 'increase') cartItem.quantity++;
+          else if(action === 'decrease') {
+            cartItem.quantity--;
+            if(cartItem.quantity <= 0) cart = cart.filter(item => item.id !== productId);
+          }
+          updateCartDisplay();
+          e.preventDefault();
+        }
+
+        // Empty Cart button
+        if(e.target.id === 'empty-cart-btn') {
+          if(cart.length > 0) {
+            showConfirmation(
+              'Empty Cart',
+              'Are you sure you want to empty your cart? This action cannot be undone.',
+              () => {
+                cart = [];
+                updateCartDisplay();
+                showNotification('🗑️ Cart emptied successfully!');
+              }
+            );
+          }
+          e.preventDefault();
+        }
+
+        // Hub category filtering
+        const hubCard = e.target.closest('.hub-card');
+        if(hubCard) {
+          const category = hubCard.dataset.category;
+          categoryFilter.value = category;
+          renderProducts();
+          document.getElementById('archives').scrollIntoView({behavior: 'smooth'});
+        }
+
+        // Close modals on outside click
+        const modals = ['login', 'cart-modal', 'checkout-modal', 'tracking-modal', 'orders-modal', 'address-modal', 'cancellation-modal', 'order-detail-modal'];
+        modals.forEach(modalId => {
+          const modal = document.getElementById(modalId);
+          if(e.target === modal) {
+            toggleModal(modalId, false);
+            if (modalId === 'address-modal') hideAddressForm();
+            if (modalId === 'cancellation-modal') closeCancellationModal();
+            if (modalId === 'tracking-modal') currentOrderForTracking = null;
+          }
+        });
+
+        // Close confirmation dialog on outside click
+        if (e.target === confirmationDialog) {
+          hideConfirmation();
+        }
+      });
+
+      // Input formatting
+      document.addEventListener('input', e => {
+        // Card number formatting
+        if (e.target.id === 'card-number') {
+          let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+          let formattedInputValue = value.match(/.{1,4}/g)?.join(' ') || value;
+          if (formattedInputValue.length > 19) {
+            formattedInputValue = formattedInputValue.slice(0, 19);
+          }
+          e.target.value = formattedInputValue;
+        }
+        
+        // Expiry date formatting
+        if (e.target.id === 'expiry') {
+          let value = e.target.value.replace(/[^0-9]/gi, '');
+          if (value.length >= 3) {
+            value = value.slice(0, 2) + '/' + value.slice(2, 4);
+          }
+          e.target.value = value;
+        }
+        
+        // Cancellation comments
+        if (e.target.id === 'cancellation-comments') {
+          // Enable confirm button if reason is selected
+          if (selectedCancellationReason) {
+            document.getElementById('confirm-cancellation').disabled = false;
+          }
+        }
+      });
+
+      // Initialization
+      function init() {
+        applyTheme(currentTheme);
+        resizeCanvas();
+        initParticles();
+        animateParticles();
+        populateContent();
+        initializeDevices();
+
+        const savedUser = sessionStorage.getItem('website_currentUser');
+        if(savedUser) {
+          currentUser = savedUser;
+          updateUIForAuthState();
+          
+          // Restart tracking for existing orders
+          orders.forEach(order => {
+            if (order.status !== 'Cancelled' && order.status !== 'Delivered' && order.canCancel) {
+              startOrderTracking(order.id);
+            }
+          });
+        }
+
+        window.addEventListener('resize', () => {
+          resizeCanvas();
+          initParticles();
+        });
+
+        // Cleanup intervals on page unload
+        window.addEventListener('beforeunload', () => {
+          trackingIntervals.forEach((interval, orderId) => {
+            clearInterval(interval);
+          });
+          trackingIntervals.clear();
+        });
+      }
+
+      init();
+    });
+    
+      document.addEventListener('DOMContentLoaded', function () {
+       // Find the purple “PhonePe” button inside the UPI form
+      const phonepeBtn = document.querySelector('#upi-form button.bg-purple-600');
+  const qrBox     = document.getElementById('phonepe-qr-box');
+
+  if (phonepeBtn && qrBox) {
+    phonepeBtn.addEventListener('click', function () {
+      qrBox.style.display = 'block';   // show the QR code
+    });
+  }
+});
+
+
+  </script>
+</body>
+</html>
