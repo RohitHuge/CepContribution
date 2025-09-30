@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import WikipediaModal from "../components/WikipediaModal";
 
 
 const benefits = [
@@ -47,6 +48,8 @@ const fadeInUp = {
 
 const Home = () => {
   const [search, setSearch] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <>
@@ -139,7 +142,10 @@ const Home = () => {
             className="w-full flex gap-2"
             onSubmit={e => {
               e.preventDefault();
-              // Implement search logic here
+              if (search.trim()) {
+                setSearchQuery(search);
+                setIsModalOpen(true);
+              }
             }}
           >
             <input
@@ -165,6 +171,13 @@ const Home = () => {
       </footer>
     </div>
     <Footer />
+    
+    {/* Wikipedia Search Modal */}
+    <WikipediaModal 
+      isOpen={isModalOpen}
+      onClose={() => setIsModalOpen(false)}
+      searchQuery={searchQuery}
+    />
     </>
   );
 };
