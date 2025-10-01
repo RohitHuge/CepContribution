@@ -7,7 +7,7 @@ A modern React-based marketplace application for students to buy and sell second
 ### 🛍️ Marketplace
 - **The Hub**: Browse items by category (Electronics, Books, Furniture, Clothing)
 - **The Archives**: Search and filter through all available items
-- **Video Calls**: Connect with sellers/buyers via video calls with recording capability
+- ~~**Video Calls**: Connect with sellers/buyers via video calls with recording capability~~ *(Disabled)*
 
 ### 🛒 Shopping Experience
 - **Shopping Cart**: Add/remove items, update quantities
@@ -21,6 +21,7 @@ A modern React-based marketplace application for students to buy and sell second
 - **Custom Cursor**: Interactive cursor effects
 - **Particle Background**: Animated background effects
 - **Modern UI**: Clean, professional design with Tailwind CSS
+- ~~**Video Calling**: WebRTC integration with recording~~ *(Disabled)*
 
 ### 🔐 User Management
 - **Authentication**: Login/Register system
@@ -32,6 +33,8 @@ A modern React-based marketplace application for students to buy and sell second
 - **Frontend**: React 18, JavaScript (ES6+)
 - **Styling**: Tailwind CSS
 - **State Management**: React Context API
+- **Authentication**: Appwrite
+- **Database**: Appwrite Database
 - **Routing**: React Router DOM
 - **Build Tool**: Vite
 - **Fonts**: Google Fonts (Inter, Orbitron)
@@ -44,7 +47,7 @@ src/
 │   ├── Header.jsx      # Navigation header
 │   ├── Hub.jsx         # Main marketplace section
 │   ├── Archives.jsx    # Item browsing section
-│   ├── VideoSection.jsx # Video calling interface
+│   ├── VideoSection.jsx # Video calling interface (DISABLED)
 │   ├── LoginModal.jsx  # Authentication modal
 │   ├── CartModal.jsx   # Shopping cart modal
 │   ├── OrdersModal.jsx # Order management modal
@@ -53,7 +56,14 @@ src/
 │   ├── CustomCursor.jsx # Custom cursor component
 │   └── ParticleBackground.jsx # Animated background
 ├── contexts/           # State management
-│   └── AppContext.jsx  # Global application state
+│   ├── AppContext.jsx  # Global application state
+│   └── AuthContext.jsx # Authentication context
+├── lib/               # External service integrations
+│   └── appwrite.js    # Appwrite configuration and helpers
+├── config/            # Configuration files
+│   └── appwrite.js    # Appwrite settings
+├── utils/             # Utility functions
+│   └── testAuth.js    # Authentication testing utilities
 ├── pages/              # Page components
 │   └── Home.jsx        # Main home page
 ├── hooks/              # Custom React hooks
@@ -81,12 +91,16 @@ cd StudentCart
 npm install
 ```
 
-3. Start the development server:
+3. Set up Appwrite:
+   - Follow the [Appwrite Setup Guide](./APPWRITE_SETUP.md)
+   - Copy `env.example` to `.env` and fill in your Appwrite credentials
+
+4. Start the development server:
 ```bash
 npm run dev
 ```
 
-4. Open your browser and navigate to `http://localhost:5173`
+5. Open your browser and navigate to `http://localhost:5173`
 
 ### Available Scripts
 
@@ -109,11 +123,11 @@ npm run dev
 - Grid layout with item cards
 - Responsive design
 
-### Video Calls
-- WebRTC-based video calling
-- Screen recording capability
-- Interactive controls
-- Modern video interface
+### ~~Video Calls~~ *(Disabled)*
+- ~~WebRTC-based video calling~~
+- ~~Screen recording capability~~
+- ~~Interactive controls~~
+- ~~Modern video interface~~
 
 ### Shopping Cart
 - Persistent cart state

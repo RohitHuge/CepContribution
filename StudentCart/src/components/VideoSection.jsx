@@ -1,6 +1,13 @@
+// VIDEO CALL FEATURE - COMMENTED OUT
+// This component is disabled as requested
+
 import React, { useState, useEffect } from 'react';
 
 const VideoSection = () => {
+  // Component disabled - returning null
+  return null;
+  
+  /* COMMENTED OUT - VIDEO CALL FEATURE DISABLED
   const [isVideoEnabled, setIsVideoEnabled] = useState(false);
   const [videoStream, setVideoStream] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
@@ -191,6 +198,6 @@ const VideoSection = () => {
       </div>
     </section>
   );
-};
+  */
 
 export default VideoSection;

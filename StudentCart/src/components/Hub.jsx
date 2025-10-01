@@ -1,41 +1,141 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../contexts/AppContext';
+import { getProducts, getProductImageUrls, parseProductImages, getCategories } from '../lib/appwrite';
 
 const Hub = () => {
   const { state, addToCart, openModal } = useApp();
   const { categories, cart } = state;
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [dbCategories, setDbCategories] = useState([]);
+
+  // Load categories from database on component mount
+  useEffect(() => {
+    loadDbCategories();
+  }, []);
+
+  const loadDbCategories = async () => {
+    try {
+      const response = await getCategories();
+      setDbCategories(response.documents);
+      console.log('Database categories loaded:', response.documents);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
+  };
 
   const handleCategoryClick = (category) => {
     setSelectedCategory(category);
-    // Load items for this category
-    loadItemsForCategory(category.id);
+    // Find the corresponding database category
+    const dbCategory = dbCategories.find(dbCat => 
+      dbCat.name.toLowerCase() === category.name.toLowerCase()
+    );
+    
+    if (dbCategory) {
+      console.log('Found database category:', dbCategory);
+      loadItemsForCategory(dbCategory.$id);
+    } else {
+      console.log('No database category found for:', category.name);
+      // Fallback: try to load all products and filter manually
+      loadAllProductsAndFilter(category.name);
+    }
   };
 
-  const loadItemsForCategory = (categoryId) => {
-    // Mock data - in real app, this would be an API call
-    const mockItems = [
-      {
-        id: 1,
-        name: 'MacBook Pro 13"',
-        price: 45000,
-        condition: 'Excellent',
-        seller: 'John Doe',
-        image: '/api/placeholder/300/200',
-        description: 'M1 chip, 8GB RAM, 256GB SSD'
-      },
-      {
-        id: 2,
-        name: 'iPhone 12',
-        price: 25000,
-        condition: 'Good',
-        seller: 'Jane Smith',
-        image: '/api/placeholder/300/200',
-        description: '128GB, Space Gray'
+  const loadAllProductsAndFilter = async (categoryName) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('Loading all products and filtering by category name:', categoryName);
+      
+      const response = await getProducts({ isAvailable: true });
+      console.log('All products loaded:', response.documents);
+      
+      // Find the database category that matches the name
+      const dbCategory = dbCategories.find(dbCat => 
+        dbCat.name.toLowerCase() === categoryName.toLowerCase()
+      );
+      
+      let filteredProducts = [];
+      if (dbCategory) {
+        // Filter by category ID
+        filteredProducts = response.documents.filter(product => product.category === dbCategory.$id);
+        console.log('Filtered by category ID:', dbCategory.$id, 'Found:', filteredProducts.length);
+      } else {
+        // If no database category found, show all products
+        filteredProducts = response.documents;
+        console.log('No database category found, showing all products');
       }
-    ];
-    setItems(mockItems);
+      
+      const products = filteredProducts.map(product => ({
+        id: product.$id,
+        name: product.name,
+        price: product.price,
+        condition: product.condition,
+        seller: product.sellerName,
+        category: product.category,
+        description: product.description,
+        location: product.location,
+        contactInfo: product.contactInfo,
+        isAvailable: product.isAvailable,
+        views: product.views || 0,
+        likes: product.likes || 0,
+        images: parseProductImages(product.images),
+        imageUrls: getProductImageUrls(product.images)
+      }));
+      
+      console.log('Processed products:', products);
+      setItems(products);
+    } catch (err) {
+      console.error('Error loading products:', err);
+      setError('Failed to load products for this category.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadItemsForCategory = async (categoryId) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('Loading products for category ID:', categoryId);
+      
+      const response = await getProducts({ 
+        category: categoryId,
+        isAvailable: true 
+      });
+      
+      console.log('Products response:', response);
+      console.log('Number of products found:', response.documents.length);
+      
+      const products = response.documents.map(product => ({
+        id: product.$id,
+        name: product.name,
+        price: product.price,
+        condition: product.condition,
+        seller: product.sellerName,
+        category: product.category,
+        description: product.description,
+        location: product.location,
+        contactInfo: product.contactInfo,
+        isAvailable: product.isAvailable,
+        views: product.views || 0,
+        likes: product.likes || 0,
+        images: parseProductImages(product.images),
+        imageUrls: getProductImageUrls(product.images)
+      }));
+      
+      console.log('Processed products:', products);
+      setItems(products);
+    } catch (err) {
+      console.error('Error loading products for category:', err);
+      setError('Failed to load products for this category.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAddToCart = (item) => {
@@ -77,12 +177,51 @@ const Hub = () => {
           <h3 className="text-2xl font-bold mb-6">
             {selectedCategory.name} Items
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {items.map((item) => (
-              <div key={item.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-                <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-lg mb-4 flex items-center justify-center">
-                  <span className="text-gray-400">Image Placeholder</span>
-                </div>
+          
+          {/* Loading State */}
+          {loading && (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0077be] dark:border-[#00F0FF] mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-gray-300">Loading products...</p>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <div className="text-center py-12">
+              <div className="bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-lg p-6 max-w-md mx-auto">
+                <p className="text-red-700 dark:text-red-300 mb-4">{error}</p>
+                <button
+                  onClick={() => loadItemsForCategory(selectedCategory.id)}
+                  className="bg-[#0077be] dark:bg-[#00F0FF] text-white px-4 py-2 rounded-lg hover:bg-[#005a8b] dark:hover:bg-[#00b8cc] transition-colors"
+                >
+                  Try Again
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Products Grid */}
+          {!loading && !error && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {items.map((item) => (
+                <div key={item.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                  <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-lg mb-4 flex items-center justify-center relative">
+                    {item.imageUrls && item.imageUrls.length > 0 && item.imageUrls[0] ? (
+                      <img
+                        src={item.imageUrls[0]}
+                        alt={item.name}
+                        className="w-full h-full object-cover rounded-lg"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div className="absolute inset-0 flex items-center justify-center rounded-lg" style={{ display: item.imageUrls && item.imageUrls[0] ? 'none' : 'flex' }}>
+                      <span className="text-gray-400">No Image</span>
+                    </div>
+                  </div>
                 <h4 className="font-bold text-lg mb-2">{item.name}</h4>
                 <p className="text-gray-600 dark:text-gray-300 text-sm mb-2">{item.description}</p>
                 <div className="flex justify-between items-center mb-4">
@@ -91,6 +230,11 @@ const Hub = () => {
                   </span>
                   <span className="text-sm text-gray-500">Condition: {item.condition}</span>
                 </div>
+                <div className="flex justify-between items-center text-xs text-gray-400 mb-3">
+                  <span>📍 {item.location}</span>
+                  <span>👁️ {item.views} views</span>
+                </div>
+                
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">Seller: {item.seller}</span>
                   <button
@@ -102,7 +246,15 @@ const Hub = () => {
                 </div>
               </div>
             ))}
-          </div>
+            </div>
+          )}
+
+          {/* No Items State */}
+          {!loading && !error && items.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">No items found in this category.</p>
+            </div>
+          )}
         </div>
       )}
 

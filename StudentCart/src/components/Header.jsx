@@ -1,9 +1,13 @@
 import React from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../contexts/AppContext';
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
-  const { state, toggleDarkMode, openModal, logout } = useApp();
-  const { isDarkMode, isLoggedIn, user, cartCount } = state;
+  const { isAuthenticated, user, logout } = useAuth();
+  const { state, toggleDarkMode, openModal } = useApp();
+  const { isDarkMode, cartCount } = state;
+  const navigate = useNavigate();
 
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
@@ -14,6 +18,14 @@ const Header = () => {
 
   const handleOpenModal = (modalId) => {
     openModal(modalId);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
+  const handleAuthClick = () => {
+    navigate('/auth');
   };
 
   return (
@@ -36,36 +48,43 @@ const Header = () => {
           >
             The Archives
           </button>
-          <button 
+          {/* Video Calls - COMMENTED OUT */}
+          {/* <button 
             onClick={() => scrollToSection('video-section')}
             className="text-sm uppercase tracking-wider hover:text-[#0077be] dark:hover:text-[#00F0FF] transition-colors"
           >
             Video Calls
-          </button>
+          </button> */}
           <button 
             onClick={() => handleOpenModal('orders-modal')}
             className="text-sm uppercase tracking-wider hover:text-[#0077be] dark:hover:text-[#00F0FF] transition-colors"
           >
             My Orders
           </button>
-          <button 
+          {/* <button 
             onClick={() => handleOpenModal('address-modal')}
             className="text-sm uppercase tracking-wider hover:text-[#0077be] dark:hover:text-[#00F0FF] transition-colors"
           >
             My Addresses
-          </button>
-          {!isLoggedIn ? (
+          </button> */}
+          {!isAuthenticated ? (
             <button 
-              onClick={() => handleOpenModal('login')}
+              onClick={handleAuthClick}
               className="text-sm uppercase tracking-wider hover:text-[#0077be] dark:hover:text-[#00F0FF] transition-colors"
             >
               Login
             </button>
           ) : (
             <div className="flex items-center space-x-4">
+              <button 
+                onClick={() => navigate('/upload')}
+                className="bg-[#0077be] dark:bg-[#00F0FF] text-white px-4 py-2 rounded-lg hover:bg-[#005a8b] dark:hover:bg-[#00b8cc] transition-colors text-sm font-medium"
+              >
+                Sell Item
+              </button>
               <span className="text-sm">Welcome, {user?.name || 'User'}</span>
               <button 
-                onClick={logout}
+                onClick={handleLogout}
                 className="text-sm uppercase tracking-wider hover:text-[#0077be] dark:hover:text-[#00F0FF] transition-colors"
               >
                 Logout
