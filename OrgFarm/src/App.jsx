@@ -5,7 +5,8 @@ import Innovations from './pages/Innovations'
 import Fertilizers from './pages/fertilizers'
 import Auth from './pages/Auth'
 import { AuthProvider } from './context/AuthContext'
-import AdminDashboard from './pages/adminDashboard'
+import AdminDashboard from "./pages/adminDashboard.jsx";
+
 
 function App() {
 
