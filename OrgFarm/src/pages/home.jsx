@@ -21,11 +21,11 @@ const benefits = [
     title: "Eco-Friendly",
     desc: "Minimizes pollution and protects biodiversity."
   },
-  {
-    icon: "💪",
-    title: "Nutrient-Rich Food",
-    desc: "Produces healthier, more nutritious crops."
-  },
+  // {
+  //   icon: "💪",
+  //   title: "Nutrient-Rich Food",
+  //   desc: "Produces healthier, more nutritious crops."
+  // },
 //   {
 //     icon: "🌾",
 //     title: "Resilient Farms",
