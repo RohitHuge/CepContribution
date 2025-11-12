@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { supabase } from "../lib/supabaseClient";
+
 // Section 1: Hero Banner
 const HERO_IMG = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80";
 
@@ -200,16 +202,37 @@ const SubmitInnovation = () => {
     setForm(f => ({ ...f, [name]: files ? files[0] : value }));
   };
 
-  const handleSubmit = e => {
-    e.preventDefault();
-    const errs = validate();
-    setErrors(errs);
-    if (Object.keys(errs).length === 0) {
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  const errs = validate();
+  setErrors(errs);
+
+  if (Object.keys(errs).length === 0) {
+    try {
+      // Insert into Supabase
+      const { data, error } = await supabase
+        .from("innovations")
+        .insert([
+          {
+            name: form.name,
+            email: form.email,
+            title: form.title,
+            description: form.desc,
+            image_url: form.image ? form.image.name : null
+          }
+        ]);
+
+      if (error) throw error;
+
       setSubmitted(true);
       setTimeout(() => setSubmitted(false), 3000);
       setForm({ name: "", email: "", title: "", desc: "", image: null });
+    } catch (error) {
+      console.error("Error submitting innovation:", error.message);
+      setErrors({ submit: "Something went wrong while submitting your idea." });
     }
-  };
+  }
+};
 
   return (
     <section className="py-20 bg-green-50">
@@ -260,7 +283,7 @@ const SubmitInnovation = () => {
             />
             {errors.desc && <div className="text-red-500 text-sm mt-1">{errors.desc}</div>}
           </div>
-          <div>
+          {/* <div>
             <label className="block text-green-700 font-medium mb-1">Image (optional)</label>
             <input
               type="file"
@@ -269,7 +292,7 @@ const SubmitInnovation = () => {
               onChange={handleChange}
               className="w-full px-4 py-2 rounded-xl border border-green-200 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-200 text-green-800 bg-white shadow-sm"
             />
-          </div>
+          </div> */}
           <button
             type="submit"
             className="px-8 py-3 bg-gradient-to-r from-[#2e8b57] to-[#4CAF50] text-white font-semibold rounded-xl shadow hover:from-[#4CAF50] hover:to-[#2e8b57] transition-all duration-200 focus:outline-none"

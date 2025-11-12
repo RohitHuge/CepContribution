@@ -57,7 +57,7 @@ const Footer = () => {
       </div>
       {/* Bottom Bar */}
       <div className="text-center py-4 text-green-100 text-sm bg-[#2e8b57]">
-        © 2025 | Created by Sumit Mate | Guidance by Rohit H.| Organic Farming Project
+        © 2025 |CEP PCCOER| Organic Farming Project
       </div>
     </footer>
   );
